@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePage, router } from "@inertiajs/react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import {
@@ -48,10 +49,21 @@ ChartJS.register(
 import DashboardLayout from "../Layouts/DashboardLayout";
 
 const Reports = () => {
+    const { props } = usePage();
+    const { reports: initialReports, categories: initialCategories } = props;
+
     const [selectedPeriod, setSelectedPeriod] = useState("7days");
     const [selectedReport, setSelectedReport] = useState("sales");
+    const [reports, setReports] = useState(initialReports || {});
+    const [categories, setCategories] = useState(initialCategories || []);
 
-    // Sample data for different time periods
+    // Update data when props change
+    useEffect(() => {
+        setReports(initialReports || {});
+        setCategories(initialCategories || []);
+    }, [initialReports, initialCategories]);
+
+    // Sample data structure for different time periods
     const reportData = {
         "7days": {
             sales: {
@@ -59,10 +71,7 @@ const Reports = () => {
                 datasets: [
                     {
                         label: "Sales (IDR)",
-                        data: [
-                            120000, 150000, 180000, 140000, 200000, 250000,
-                            220000,
-                        ],
+                        data: reports.last7Days?.salesData || [120000, 150000, 180000, 140000, 200000, 250000, 220000],
                         backgroundColor: "rgba(102, 185, 182, 0.5)",
                         borderColor: "rgba(102, 185, 182, 1)",
                         borderWidth: 2,
@@ -74,14 +83,14 @@ const Reports = () => {
                 datasets: [
                     {
                         label: "Stock In",
-                        data: [50, 30, 40, 20, 60, 45, 35],
+                        data: reports.last7Days?.stockInData || [50, 30, 40, 20, 60, 45, 35],
                         backgroundColor: "rgba(34, 197, 94, 0.5)",
                         borderColor: "rgba(34, 197, 94, 1)",
                         borderWidth: 2,
                     },
                     {
                         label: "Stock Out",
-                        data: [45, 55, 35, 50, 40, 65, 50],
+                        data: reports.last7Days?.stockOutData || [45, 55, 35, 50, 40, 65, 50],
                         backgroundColor: "rgba(239, 68, 68, 0.5)",
                         borderColor: "rgba(239, 68, 68, 1)",
                         borderWidth: 2,
@@ -95,7 +104,7 @@ const Reports = () => {
                 datasets: [
                     {
                         label: "Sales (IDR)",
-                        data: [850000, 1200000, 950000, 1100000],
+                        data: reports.last30Days?.salesData || [850000, 1200000, 950000, 1100000],
                         backgroundColor: "rgba(102, 185, 182, 0.5)",
                         borderColor: "rgba(102, 185, 182, 1)",
                         borderWidth: 2,
@@ -107,14 +116,14 @@ const Reports = () => {
                 datasets: [
                     {
                         label: "Stock In",
-                        data: [200, 180, 220, 150],
+                        data: reports.last30Days?.stockInData || [200, 180, 220, 150],
                         backgroundColor: "rgba(34, 197, 94, 0.5)",
                         borderColor: "rgba(34, 197, 94, 1)",
                         borderWidth: 2,
                     },
                     {
                         label: "Stock Out",
-                        data: [180, 200, 190, 170],
+                        data: reports.last30Days?.stockOutData || [180, 200, 190, 170],
                         backgroundColor: "rgba(239, 68, 68, 0.5)",
                         borderColor: "rgba(239, 68, 68, 1)",
                         borderWidth: 2,
@@ -128,7 +137,7 @@ const Reports = () => {
                 datasets: [
                     {
                         label: "Sales (IDR)",
-                        data: [3200000, 4100000, 3800000],
+                        data: reports.last90Days?.salesData || [3200000, 4100000, 3800000],
                         backgroundColor: "rgba(102, 185, 182, 0.5)",
                         borderColor: "rgba(102, 185, 182, 1)",
                         borderWidth: 2,
@@ -140,14 +149,14 @@ const Reports = () => {
                 datasets: [
                     {
                         label: "Stock In",
-                        data: [750, 820, 680],
+                        data: reports.last90Days?.stockInData || [750, 820, 680],
                         backgroundColor: "rgba(34, 197, 94, 0.5)",
                         borderColor: "rgba(34, 197, 94, 1)",
                         borderWidth: 2,
                     },
                     {
                         label: "Stock Out",
-                        data: [720, 780, 650],
+                        data: reports.last90Days?.stockOutData || [720, 780, 650],
                         backgroundColor: "rgba(239, 68, 68, 0.5)",
                         borderColor: "rgba(239, 68, 68, 1)",
                         borderWidth: 2,
@@ -157,19 +166,12 @@ const Reports = () => {
         },
     };
 
-    // Medicine category distribution data
+    // Medicine category distribution data from backend
     const categoryData = {
-        labels: [
-            "Pain Relief",
-            "Antibiotic",
-            "Supplement",
-            "Allergy",
-            "Gastric",
-            "Diabetes",
-        ],
+        labels: categories.map(cat => cat.name),
         datasets: [
             {
-                data: [25, 20, 18, 15, 12, 10],
+                data: categories.map(cat => cat.count),
                 backgroundColor: [
                     "#66b9b6",
                     "#4ade80",
@@ -177,31 +179,33 @@ const Reports = () => {
                     "#f97316",
                     "#8b5cf6",
                     "#ec4899",
+                    "#f59e0b",
+                    "#10b981",
                 ],
                 borderWidth: 0,
             },
         ],
     };
 
-    // Summary statistics
+    // Summary statistics from backend
     const summaryStats = {
         "7days": {
-            totalSales: 1260000,
-            transactions: 89,
-            averageTransaction: 14157,
-            topMedicine: "Paracetamol 500mg",
+            totalSales: reports.last7Days?.totalSales || 1260000,
+            transactions: reports.last7Days?.totalTransactions || 89,
+            averageTransaction: reports.last7Days?.averageTransaction || 14157,
+            topMedicine: reports.last7Days?.topMedicine || "Paracetamol 500mg",
         },
         "30days": {
-            totalSales: 4100000,
-            transactions: 312,
-            averageTransaction: 13141,
-            topMedicine: "Amoxicillin 250mg",
+            totalSales: reports.last30Days?.totalSales || 4100000,
+            transactions: reports.last30Days?.totalTransactions || 312,
+            averageTransaction: reports.last30Days?.averageTransaction || 13141,
+            topMedicine: reports.last30Days?.topMedicine || "Amoxicillin 250mg",
         },
         "90days": {
-            totalSales: 11100000,
-            transactions: 856,
-            averageTransaction: 12967,
-            topMedicine: "Vitamin C 1000mg",
+            totalSales: reports.last90Days?.totalSales || 11100000,
+            transactions: reports.last90Days?.totalTransactions || 856,
+            averageTransaction: reports.last90Days?.averageTransaction || 12967,
+            topMedicine: reports.last90Days?.topMedicine || "Vitamin C 1000mg",
         },
     };
 
@@ -261,7 +265,7 @@ const Reports = () => {
     };
 
     const handleExportReport = () => {
-        // Mock export functionality
+        // Export functionality using backend data
         const data = {
             period: getPeriodLabel(selectedPeriod),
             reportType: selectedReport,
@@ -282,6 +286,14 @@ const Reports = () => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
+
+    // Refresh data when period changes
+    useEffect(() => {
+        router.get(route('reports.index'), { period: selectedPeriod }, {
+            preserveState: true,
+            replace: true,
+        });
+    }, [selectedPeriod]);
 
     return (
         <DashboardLayout>
@@ -570,9 +582,9 @@ const Reports = () => {
                                                         reportData[
                                                             selectedPeriod
                                                         ][selectedReport]
-                                                            .datasets[1].data[
+                                                            .datasets[1]?.data[
                                                             index
-                                                        ]
+                                                        ] || 0
                                                     }{" "}
                                                     units
                                                 </td>

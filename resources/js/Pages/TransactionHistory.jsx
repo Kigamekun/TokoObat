@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePage, router } from "@inertiajs/react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -33,129 +34,39 @@ import { toast } from "sonner";
 import DashboardLayout from "../Layouts/DashboardLayout";
 
 const TransactionHistory = () => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [dateRange, setDateRange] = useState("all");
-    const [cashierFilter, setCashierFilter] = useState("all");
+    const { props } = usePage();
+    const { transactions: initialTransactions, filters: initialFilters } = props;
+
+    const [searchTerm, setSearchTerm] = useState(initialFilters?.search || "");
+    const [dateRange, setDateRange] = useState(initialFilters?.date_range || "all");
+    const [cashierFilter, setCashierFilter] = useState(initialFilters?.cashier || "all");
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showDetails, setShowDetails] = useState(false);
+ const [transactions, setTransactions] = useState(initialTransactions?.data || []);
 
-    // Sample transaction history data
-    const [transactions] = useState([
-        {
-            id: "TXN001",
-            date: "2024-01-15",
-            time: "14:30",
-            customer: { name: "Ahmad Rahman", phone: "08123456789" },
-            cashier: "Staff 1",
-            items: [
-                { name: "Paracetamol 500mg", quantity: 2, price: 5000 },
-                { name: "Vitamin C 1000mg", quantity: 1, price: 12000 },
-            ],
-            subtotal: 22000,
-            discount: 2200,
-            total: 19800,
-            paymentMethod: "Cash",
-            status: "completed",
-        },
-        {
-            id: "TXN002",
-            date: "2024-01-15",
-            time: "13:15",
-            customer: { name: "Siti Nurhaliza", phone: "08234567890" },
-            cashier: "Staff 2",
-            items: [
-                { name: "Amoxicillin 250mg", quantity: 3, price: 15000 },
-                { name: "Ibuprofen 400mg", quantity: 2, price: 8000 },
-                { name: "Cetirizine 10mg", quantity: 1, price: 10000 },
-            ],
-            subtotal: 71000,
-            discount: 0,
-            total: 71000,
-            paymentMethod: "Card",
-            status: "completed",
-        },
-        {
-            id: "TXN003",
-            date: "2024-01-14",
-            time: "16:45",
-            customer: { name: "Budi Santoso", phone: "" },
-            cashier: "Admin",
-            items: [
-                { name: "Omeprazole 20mg", quantity: 1, price: 18000 },
-                { name: "Metformin 500mg", quantity: 2, price: 6000 },
-            ],
-            subtotal: 30000,
-            discount: 3000,
-            total: 27000,
-            paymentMethod: "Cash",
-            status: "completed",
-        },
-        {
-            id: "TXN004",
-            date: "2024-01-14",
-            time: "11:20",
-            customer: { name: "Linda Sari", phone: "08345678901" },
-            cashier: "Staff 1",
-            items: [
-                { name: "Loratadine 10mg", quantity: 4, price: 9000 },
-                { name: "Vitamin C 1000mg", quantity: 2, price: 12000 },
-            ],
-            subtotal: 60000,
-            discount: 0,
-            total: 60000,
-            paymentMethod: "Cash",
-            status: "completed",
-        },
-        {
-            id: "TXN005",
-            date: "2024-01-13",
-            time: "09:30",
-            customer: { name: "Rina Dewi", phone: "08456789012" },
-            cashier: "Staff 2",
-            items: [
-                { name: "Paracetamol 500mg", quantity: 3, price: 5000 },
-                { name: "Ibuprofen 400mg", quantity: 1, price: 8000 },
-            ],
-            subtotal: 23000,
-            discount: 1150,
-            total: 21850,
-            paymentMethod: "Card",
-            status: "completed",
-        },
-        {
-            id: "TXN006",
-            date: "2024-01-13",
-            time: "15:10",
-            customer: { name: "", phone: "" },
-            cashier: "Staff 1",
-            items: [{ name: "Cetirizine 10mg", quantity: 1, price: 10000 }],
-            subtotal: 10000,
-            discount: 0,
-            total: 10000,
-            paymentMethod: "Cash",
-            status: "completed",
-        },
-    ]);
+    // Update transactions when props change
+  useEffect(() => {
+    setTransactions(initialTransactions?.data || []);
+}, [initialTransactions]);
 
-    const cashiers = [...new Set(transactions.map((t) => t.cashier))];
+    // Get unique cashiers from transactions
+    const cashiers = [...new Set(transactions.map((t) => t.user?.name || 'Unknown'))];
 
     // Filter transactions
     const filteredTransactions = transactions.filter((transaction) => {
         const matchesSearch =
-            transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            transaction.customer.name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            transaction.items.some((item) =>
-                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            transaction.transaction_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            transaction.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            transaction.items?.some((item) =>
+                item.medicine?.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
 
         const matchesCashier =
-            cashierFilter === "all" || transaction.cashier === cashierFilter;
+            cashierFilter === "all" || (transaction.user?.name === cashierFilter);
 
         const matchesDate = () => {
             if (dateRange === "all") return true;
-            const transactionDate = new Date(transaction.date);
+            const transactionDate = new Date(transaction.created_at);
             const today = new Date();
 
             switch (dateRange) {
@@ -186,6 +97,23 @@ const TransactionHistory = () => {
         return matchesSearch && matchesCashier && matchesDate();
     });
 
+    // Apply filters with debounce
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            const params = {};
+            if (searchTerm) params.search = searchTerm;
+            if (dateRange !== 'all') params.date_range = dateRange;
+            if (cashierFilter !== 'all') params.cashier = cashierFilter;
+
+            router.get(route('transactions.history'), params, {
+                preserveState: true,
+                replace: true,
+            });
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, dateRange, cashierFilter]);
+
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
@@ -202,6 +130,13 @@ const TransactionHistory = () => {
         });
     };
 
+    const formatTime = (dateString) => {
+        return new Date(dateString).toLocaleTimeString("id-ID", {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     const handleViewDetails = (transaction) => {
         setSelectedTransaction(transaction);
         setShowDetails(true);
@@ -212,10 +147,28 @@ const TransactionHistory = () => {
             exportDate: new Date().toISOString(),
             totalTransactions: filteredTransactions.length,
             totalAmount: filteredTransactions.reduce(
-                (sum, t) => sum + t.total,
+                (sum, t) => sum + parseFloat(t.total),
                 0
             ),
-            transactions: filteredTransactions,
+            transactions: filteredTransactions.map(t => ({
+                id: t.transaction_code,
+                date: t.created_at,
+                customer: {
+                    name: t.customer_name,
+                    phone: t.customer_phone
+                },
+                cashier: t.user?.name,
+                items: t.items?.map(item => ({
+                    name: item.medicine?.name,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                subtotal: t.subtotal,
+                discount: t.discount_value,
+                total: t.total,
+                paymentMethod: "Cash", // You might want to add this field to your transactions
+                status: "completed"
+            })),
         };
 
         const blob = new Blob([JSON.stringify(exportData, null, 2)], {
@@ -235,6 +188,13 @@ const TransactionHistory = () => {
         toast.success("Transaction history exported successfully!");
     };
 
+    // Calculate summary statistics
+    const totalRevenue = filteredTransactions.reduce((sum, t) => sum + parseFloat(t.total), 0);
+    const totalItems = filteredTransactions.reduce((sum, t) =>
+        sum + (t.items?.reduce((itemSum, item) => itemSum + item.quantity, 0) || 0), 0
+    );
+    const averageTransaction = filteredTransactions.length > 0 ? totalRevenue / filteredTransactions.length : 0;
+
     return (
         <DashboardLayout>
             <div className="space-y-6 fade-in">
@@ -248,8 +208,7 @@ const TransactionHistory = () => {
                             Transaction History
                         </h1>
                         <p className="text-sm text-gray-600 mt-1">
-                            View and manage all past transactions and sales
-                            records
+                            View and manage all past transactions and sales records
                         </p>
                     </div>
                     <Button
@@ -287,12 +246,7 @@ const TransactionHistory = () => {
                                     Total Revenue
                                 </p>
                                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                                    {formatCurrency(
-                                        filteredTransactions.reduce(
-                                            (sum, t) => sum + t.total,
-                                            0
-                                        )
-                                    )}
+                                    {formatCurrency(totalRevenue)}
                                 </p>
                             </div>
                             <div className="p-3 bg-green-50 rounded-full">
@@ -308,14 +262,7 @@ const TransactionHistory = () => {
                                     Average Transaction
                                 </p>
                                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                                    {formatCurrency(
-                                        filteredTransactions.length > 0
-                                            ? filteredTransactions.reduce(
-                                                  (sum, t) => sum + t.total,
-                                                  0
-                                              ) / filteredTransactions.length
-                                            : 0
-                                    )}
+                                    {formatCurrency(averageTransaction)}
                                 </p>
                             </div>
                             <div className="p-3 bg-blue-50 rounded-full">
@@ -331,16 +278,7 @@ const TransactionHistory = () => {
                                     Items Sold
                                 </p>
                                 <p className="text-2xl font-bold text-gray-900 mt-1">
-                                    {filteredTransactions.reduce(
-                                        (sum, t) =>
-                                            sum +
-                                            t.items.reduce(
-                                                (itemSum, item) =>
-                                                    itemSum + item.quantity,
-                                                0
-                                            ),
-                                        0
-                                    )}
+                                    {totalItems}
                                 </p>
                             </div>
                             <div className="p-3 bg-purple-50 rounded-full">
@@ -437,13 +375,10 @@ const TransactionHistory = () => {
                                         Total
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Payment
+                                        Discount
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Cashier
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
@@ -457,33 +392,26 @@ const TransactionHistory = () => {
                                         className="hover:bg-gray-50"
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-teal-600">
-                                            {transaction.id}
+                                            {transaction.transaction_code}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div>
                                                 <div className="font-medium">
-                                                    {formatDate(
-                                                        transaction.date
-                                                    )}
+                                                    {formatDate(transaction.created_at)}
                                                 </div>
                                                 <div className="text-gray-500">
-                                                    {transaction.time}
+                                                    {formatTime(transaction.created_at)}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div>
                                                 <div className="font-medium">
-                                                    {transaction.customer
-                                                        .name ||
-                                                        "Walk-in Customer"}
+                                                    {transaction.customer_name || "Walk-in Customer"}
                                                 </div>
-                                                {transaction.customer.phone && (
+                                                {transaction.customer_phone && (
                                                     <div className="text-gray-500">
-                                                        {
-                                                            transaction.customer
-                                                                .phone
-                                                        }
+                                                        {transaction.customer_phone}
                                                     </div>
                                                 )}
                                             </div>
@@ -491,54 +419,27 @@ const TransactionHistory = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div className="flex items-center">
                                                 <Package className="w-4 h-4 text-gray-400 mr-1" />
-                                                {transaction.items.length}{" "}
-                                                item(s)
+                                                {transaction.items?.length || 0} item(s)
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                            <div>
-                                                <div>
-                                                    {formatCurrency(
-                                                        transaction.total
-                                                    )}
-                                                </div>
-                                                {transaction.discount > 0 && (
-                                                    <div className="text-green-600 text-xs">
-                                                        Discount: -
-                                                        {formatCurrency(
-                                                            transaction.discount
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
+                                            {formatCurrency(transaction.total)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <Badge
-                                                variant={
-                                                    transaction.paymentMethod ===
-                                                    "Cash"
-                                                        ? "secondary"
-                                                        : "outline"
-                                                }
-                                            >
-                                                {transaction.paymentMethod}
-                                            </Badge>
+                                            {transaction.discount_value > 0 ? (
+                                                <span className="text-green-600">
+                                                    -{formatCurrency(transaction.discount_value)}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {transaction.cashier}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Badge className="bg-green-100 text-green-800">
-                                                {transaction.status}
-                                            </Badge>
+                                            {transaction.user?.name || 'Unknown'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <Button
-                                                onClick={() =>
-                                                    handleViewDetails(
-                                                        transaction
-                                                    )
-                                                }
+                                                onClick={() => handleViewDetails(transaction)}
                                                 variant="ghost"
                                                 size="sm"
                                                 className="text-teal-600 hover:text-teal-700"
@@ -595,7 +496,7 @@ const TransactionHistory = () => {
                                             Transaction ID:
                                         </span>
                                         <p className="font-mono">
-                                            {selectedTransaction.id}
+                                            {selectedTransaction.transaction_code}
                                         </p>
                                     </div>
                                     <div>
@@ -603,58 +504,46 @@ const TransactionHistory = () => {
                                             Date & Time:
                                         </span>
                                         <p>
-                                            {formatDate(
-                                                selectedTransaction.date
-                                            )}{" "}
-                                            at {selectedTransaction.time}
+                                            {formatDate(selectedTransaction.created_at)} at {formatTime(selectedTransaction.created_at)}
                                         </p>
                                     </div>
                                     <div>
                                         <span className="font-medium text-gray-600">
                                             Cashier:
                                         </span>
-                                        <p>{selectedTransaction.cashier}</p>
+                                        <p>{selectedTransaction.user?.name || 'Unknown'}</p>
                                     </div>
                                     <div>
                                         <span className="font-medium text-gray-600">
-                                            Payment Method:
+                                            Discount Type:
                                         </span>
-                                        <p>
-                                            {selectedTransaction.paymentMethod}
+                                        <p className="capitalize">
+                                            {selectedTransaction.discount_type}
                                         </p>
                                     </div>
                                 </div>
 
                                 {/* Customer Info */}
-                                {(selectedTransaction.customer.name ||
-                                    selectedTransaction.customer.phone) && (
+                                {(selectedTransaction.customer_name || selectedTransaction.customer_phone) && (
                                     <div className="border-b pb-4">
                                         <h4 className="font-medium text-gray-900 mb-2">
                                             Customer Information
                                         </h4>
                                         <div className="text-sm space-y-1">
-                                            {selectedTransaction.customer
-                                                .name && (
+                                            {selectedTransaction.customer_name && (
                                                 <p>
                                                     <span className="font-medium text-gray-600">
                                                         Name:
                                                     </span>{" "}
-                                                    {
-                                                        selectedTransaction
-                                                            .customer.name
-                                                    }
+                                                    {selectedTransaction.customer_name}
                                                 </p>
                                             )}
-                                            {selectedTransaction.customer
-                                                .phone && (
+                                            {selectedTransaction.customer_phone && (
                                                 <p>
                                                     <span className="font-medium text-gray-600">
                                                         Phone:
                                                     </span>{" "}
-                                                    {
-                                                        selectedTransaction
-                                                            .customer.phone
-                                                    }
+                                                    {selectedTransaction.customer_phone}
                                                 </p>
                                             )}
                                         </div>
@@ -667,37 +556,29 @@ const TransactionHistory = () => {
                                         Items Purchased
                                     </h4>
                                     <div className="space-y-2">
-                                        {selectedTransaction.items.map(
-                                            (item, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex justify-between items-center py-2 border-b border-gray-100"
-                                                >
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">
-                                                            {item.name}
-                                                        </p>
-                                                        <p className="text-sm text-gray-600">
-                                                            {formatCurrency(
-                                                                item.price
-                                                            )}{" "}
-                                                            each
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-medium">
-                                                            x{item.quantity}
-                                                        </p>
-                                                        <p className="text-sm font-semibold">
-                                                            {formatCurrency(
-                                                                item.price *
-                                                                    item.quantity
-                                                            )}
-                                                        </p>
-                                                    </div>
+                                        {selectedTransaction.items?.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex justify-between items-center py-2 border-b border-gray-100"
+                                            >
+                                                <div>
+                                                    <p className="font-medium text-gray-900">
+                                                        {item.medicine?.name || 'Unknown Medicine'}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {formatCurrency(item.price)} each
+                                                    </p>
                                                 </div>
-                                            )
-                                        )}
+                                                <div className="text-right">
+                                                    <p className="font-medium">
+                                                        x{item.quantity}
+                                                    </p>
+                                                    <p className="text-sm font-semibold">
+                                                        {formatCurrency(item.price * item.quantity)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -708,28 +589,21 @@ const TransactionHistory = () => {
                                             Subtotal:
                                         </span>
                                         <span>
-                                            {formatCurrency(
-                                                selectedTransaction.subtotal
-                                            )}
+                                            {formatCurrency(selectedTransaction.subtotal)}
                                         </span>
                                     </div>
-                                    {selectedTransaction.discount > 0 && (
+                                    {selectedTransaction.discount_value > 0 && (
                                         <div className="flex justify-between text-sm text-green-600">
                                             <span>Discount:</span>
                                             <span>
-                                                -
-                                                {formatCurrency(
-                                                    selectedTransaction.discount
-                                                )}
+                                                -{formatCurrency(selectedTransaction.discount_value)}
                                             </span>
                                         </div>
                                     )}
                                     <div className="flex justify-between text-lg font-bold border-t pt-2">
                                         <span>Total:</span>
                                         <span className="text-teal-600">
-                                            {formatCurrency(
-                                                selectedTransaction.total
-                                            )}
+                                            {formatCurrency(selectedTransaction.total)}
                                         </span>
                                     </div>
                                 </div>

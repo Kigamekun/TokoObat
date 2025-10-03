@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePage, router } from "@inertiajs/react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -15,7 +16,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "../components/ui/dialog";
 import { Badge } from "../components/ui/badge";
 import {
@@ -34,80 +34,27 @@ import { toast } from "sonner";
 import DashboardLayout from "../Layouts/DashboardLayout";
 
 const Transactions = () => {
+    const { props } = usePage();
+
+
+    const user = props.auth.user;
+    const { medicines: initialMedicines } = props;
+
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [customerInfo, setCustomerInfo] = useState({ name: "", phone: "" });
     const [discount, setDiscount] = useState({ type: "none", value: 0 });
     const [showReceipt, setShowReceipt] = useState(false);
     const [currentTransaction, setCurrentTransaction] = useState(null);
+    const [medicines, setMedicines] = useState(initialMedicines || []);
 
-    // Sample medicines data
-    const medicines = [
-        {
-            id: 1,
-            name: "Paracetamol 500mg",
-            price: 5000,
-            stock: 100,
-            category: "Pain Relief",
-            unit: "tablet",
-        },
-        {
-            id: 2,
-            name: "Amoxicillin 250mg",
-            price: 15000,
-            stock: 50,
-            category: "Antibiotic",
-            unit: "capsule",
-        },
-        {
-            id: 3,
-            name: "Ibuprofen 400mg",
-            price: 8000,
-            stock: 75,
-            category: "Pain Relief",
-            unit: "tablet",
-        },
-        {
-            id: 4,
-            name: "Vitamin C 1000mg",
-            price: 12000,
-            stock: 120,
-            category: "Supplement",
-            unit: "tablet",
-        },
-        {
-            id: 5,
-            name: "Cetirizine 10mg",
-            price: 10000,
-            stock: 60,
-            category: "Allergy",
-            unit: "tablet",
-        },
-        {
-            id: 6,
-            name: "Omeprazole 20mg",
-            price: 18000,
-            stock: 40,
-            category: "Gastric",
-            unit: "capsule",
-        },
-        {
-            id: 7,
-            name: "Loratadine 10mg",
-            price: 9000,
-            stock: 80,
-            category: "Allergy",
-            unit: "tablet",
-        },
-        {
-            id: 8,
-            name: "Metformin 500mg",
-            price: 6000,
-            stock: 90,
-            category: "Diabetes",
-            unit: "tablet",
-        },
-    ];
+    // Update medicines when props change
+    useEffect(() => {
+
+        console.log(props);
+
+        setMedicines(initialMedicines || []);
+    }, [initialMedicines]);
 
     const filteredMedicines = medicines.filter(
         (medicine) =>
@@ -117,7 +64,13 @@ const Transactions = () => {
 
     const addToCart = (medicine) => {
         const existingItem = cart.find((item) => item.id === medicine.id);
+
+        // Check if enough stock is available
         if (existingItem) {
+            if (existingItem.quantity + 1 > medicine.stock) {
+                toast.error(`Only ${medicine.stock} items available in stock`);
+                return;
+            }
             setCart(
                 cart.map((item) =>
                     item.id === medicine.id
@@ -126,6 +79,10 @@ const Transactions = () => {
                 )
             );
         } else {
+            if (medicine.stock < 1) {
+                toast.error("Out of stock");
+                return;
+            }
             setCart([...cart, { ...medicine, quantity: 1 }]);
         }
         toast.success(`${medicine.name} added to cart`);
@@ -136,6 +93,13 @@ const Transactions = () => {
             removeFromCart(id);
             return;
         }
+
+        const medicine = medicines.find((m) => m.id === id);
+        if (quantity > medicine.stock) {
+            toast.error(`Only ${medicine.stock} items available in stock`);
+            return;
+        }
+
         setCart(
             cart.map((item) =>
                 item.id === id
@@ -163,7 +127,7 @@ const Transactions = () => {
         if (discount.type === "percentage") {
             return (subtotal * discount.value) / 100;
         } else if (discount.type === "fixed") {
-            return discount.value;
+            return Math.min(discount.value, subtotal);
         }
         return 0;
     };
@@ -178,26 +142,35 @@ const Transactions = () => {
             return;
         }
 
-        const transaction = {
-            id: `TXN${Date.now()}`,
-            date: new Date().toLocaleString("id-ID"),
+        const transactionData = {
             customer: customerInfo,
-            items: cart,
-            subtotal: calculateSubtotal(),
-            discount: calculateDiscount(),
-            total: calculateTotal(),
-            cashier: "Current User",
+            discount: discount,
+            items: cart.map((item) => ({
+                id: item.id,
+                quantity: item.quantity,
+            })),
         };
 
-        setCurrentTransaction(transaction);
-        setShowReceipt(true);
-
-        // Clear cart after transaction
-        setCart([]);
-        setCustomerInfo({ name: "", phone: "" });
-        setDiscount({ type: "none", value: 0 });
-
-        toast.success("Transaction completed successfully!");
+        router.post(route("transactions.store"), transactionData, {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                toast.success(
+                    page.props.message || "Transaction completed successfully!"
+                );
+                setCart([]);
+                setCustomerInfo({ name: "", phone: "" });
+                setDiscount({ type: "none", value: 0 });
+            },
+            onError: (errors) => {
+                if (errors.message) {
+                    toast.error(errors.message);
+                } else {
+                    Object.values(errors).forEach((error) =>
+                        toast.error(error)
+                    );
+                }
+            },
+        });
     };
 
     const formatCurrency = (amount) => {
@@ -209,7 +182,7 @@ const Transactions = () => {
     };
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={user}>
             <div className="space-y-6 fade-in">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -435,6 +408,7 @@ const Transactions = () => {
                                         setDiscount({
                                             ...discount,
                                             type: value,
+                                            value: 0,
                                         })
                                     }
                                 >
@@ -472,6 +446,12 @@ const Transactions = () => {
                                             })
                                         }
                                         data-testid="discount-value-input"
+                                        min="0"
+                                        max={
+                                            discount.type === "percentage"
+                                                ? 100
+                                                : undefined
+                                        }
                                     />
                                 )}
                             </div>
@@ -525,106 +505,6 @@ const Transactions = () => {
                         </Card>
                     </div>
                 </div>
-
-                {/* Receipt Modal */}
-                <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
-                    <DialogContent className="max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Transaction Receipt</DialogTitle>
-                        </DialogHeader>
-                        {currentTransaction && (
-                            <div
-                                className="space-y-4"
-                                data-testid="transaction-receipt"
-                            >
-                                <div className="text-center border-b pb-4">
-                                    <h3 className="font-bold text-lg">
-                                        Mitra Toko Obat JGroup
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        Transaction: {currentTransaction.id}
-                                    </p>
-                                    <p className="text-sm text-gray-600">
-                                        {currentTransaction.date}
-                                    </p>
-                                </div>
-
-                                {currentTransaction.customer.name && (
-                                    <div className="border-b pb-2">
-                                        <p className="font-medium">
-                                            Customer:{" "}
-                                            {currentTransaction.customer.name}
-                                        </p>
-                                        {currentTransaction.customer.phone && (
-                                            <p className="text-sm text-gray-600">
-                                                Phone:{" "}
-                                                {
-                                                    currentTransaction.customer
-                                                        .phone
-                                                }
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className="space-y-2">
-                                    {currentTransaction.items.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex justify-between text-sm"
-                                        >
-                                            <span>
-                                                {item.name} x{item.quantity}
-                                            </span>
-                                            <span>
-                                                {formatCurrency(
-                                                    item.price * item.quantity
-                                                )}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="border-t pt-2 space-y-1">
-                                    <div className="flex justify-between">
-                                        <span>Subtotal</span>
-                                        <span>
-                                            {formatCurrency(
-                                                currentTransaction.subtotal
-                                            )}
-                                        </span>
-                                    </div>
-                                    {currentTransaction.discount > 0 && (
-                                        <div className="flex justify-between text-green-600">
-                                            <span>Discount</span>
-                                            <span>
-                                                -
-                                                {formatCurrency(
-                                                    currentTransaction.discount
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between font-bold text-lg border-t pt-1">
-                                        <span>Total</span>
-                                        <span>
-                                            {formatCurrency(
-                                                currentTransaction.total
-                                            )}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="text-center text-sm text-gray-600 border-t pt-2">
-                                    <p>Cashier: {currentTransaction.cashier}</p>
-                                    <p className="mt-2">
-                                        Thank you for your purchase!
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </DialogContent>
-                </Dialog>
             </div>
         </DashboardLayout>
     );

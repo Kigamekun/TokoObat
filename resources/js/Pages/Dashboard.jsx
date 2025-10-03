@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "../Components/ui/card";
 import { Button } from "../Components/ui/button";
+import { Head, usePage } from "@inertiajs/react";
 import { Badge } from "../Components/ui/badge";
 import {
     TrendingUp,
@@ -17,6 +18,10 @@ import {
 import DashboardLayout from "../Layouts/DashboardLayout";
 
 const Dashboard = () => {
+
+    const { props } = usePage();
+    const user = props.auth.user;
+
     const [dashboardData, setDashboardData] = useState({
         todaySales: {
             amount: 125000,
@@ -173,7 +178,7 @@ const Dashboard = () => {
     };
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={user}>
             <div className="space-y-6 fade-in">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
