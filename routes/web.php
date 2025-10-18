@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -30,9 +31,7 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Medicines
     Route::resource('medicines', MedicineController::class);
@@ -46,19 +45,5 @@ Route::middleware('auth')->group(function () {
     Route::resource('analytics', \App\Http\Controllers\AnalyticsController::class)->only(['index']);
     Route::get('/history', [TransactionController::class, 'history'])->name('history');
 });
-
-// Route::middleware(['auth'])->group(function () {
-//     Route::get('/dashboard', function () {
-//        return Inertia::render('Dashboard');
-//     })->name('dashboard');
-//     Route::get('/transactions', fn() => Inertia::render('Transactions'))->name('transactions');
-//     Route::get('/medicines', fn() => Inertia::render('MedicineCatalog'))->name('medicines');
-//     Route::get('/reports', fn() => Inertia::render('Reports'))->name('reports');
-//     Route::get('/history', fn() => Inertia::render('TransactionHistory'))->name('history');
-//     Route::get('/users', fn() => Inertia::render('UserManagement'))->name('users');
-//     Route::get('/analytics', fn() => Inertia::render('Analytics'))->name('analytics');
-//     Route::get('/settings', fn() => Inertia::render('Settings'))->name('settings');
-// });
-
 
 require __DIR__ . '/auth.php';

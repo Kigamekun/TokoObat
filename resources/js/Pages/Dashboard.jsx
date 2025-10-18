@@ -22,90 +22,10 @@ const Dashboard = () => {
     const { props } = usePage();
     const user = props.auth.user;
 
-    const [dashboardData, setDashboardData] = useState({
-        todaySales: {
-            amount: 125000,
-            transactions: 45,
-            change: 12.5,
-        },
-        totalMedicines: {
-            count: 850,
-            categories: 24,
-        },
-        lowStockAlerts: 8,
-        expiringSoon: 12,
-        topSellingMedicines: [
-            { name: "Paracetamol 500mg", sales: 85, revenue: 42500 },
-            { name: "Amoxicillin 250mg", sales: 67, revenue: 134000 },
-            { name: "Ibuprofen 400mg", sales: 52, revenue: 31200 },
-            { name: "Vitamin C 1000mg", sales: 48, revenue: 24000 },
-            { name: "Cetirizine 10mg", sales: 35, revenue: 17500 },
-        ],
-        recentTransactions: [
-            {
-                id: "TXN001",
-                customer: "Ahmad Rahman",
-                amount: 45000,
-                items: 3,
-                time: "10:30 AM",
-                cashier: "Staff 1",
-            },
-            {
-                id: "TXN002",
-                customer: "Siti Nurhaliza",
-                amount: 67500,
-                items: 5,
-                time: "10:15 AM",
-                cashier: "Staff 2",
-            },
-            {
-                id: "TXN003",
-                customer: "Budi Santoso",
-                amount: 23000,
-                items: 2,
-                time: "09:45 AM",
-                cashier: "Staff 1",
-            },
-            {
-                id: "TXN004",
-                customer: "Linda Sari",
-                amount: 89000,
-                items: 7,
-                time: "09:30 AM",
-                cashier: "Admin",
-            },
-            {
-                id: "TXN005",
-                customer: "Rina Dewi",
-                amount: 34500,
-                items: 4,
-                time: "09:15 AM",
-                cashier: "Staff 2",
-            },
-        ],
-        alerts: [
-            {
-                type: "low-stock",
-                message: "Paracetamol 500mg - Only 5 units left",
-                priority: "high",
-            },
-            {
-                type: "expiring",
-                message: "12 medicines expiring within 30 days",
-                priority: "medium",
-            },
-            {
-                type: "expired",
-                message: "3 medicines have expired",
-                priority: "high",
-            },
-            {
-                type: "info",
-                message: "Monthly inventory check scheduled for tomorrow",
-                priority: "low",
-            },
-        ],
-    });
+
+     const dashboardData = props.dashboardData; // <-- REAL DATA
+
+
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat("id-ID", {

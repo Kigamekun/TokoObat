@@ -62,12 +62,12 @@ const DashboardLayout = ({ children, user, onLogout }) => {
             icon: History,
             current: location.pathname === "/history",
         },
-        {
-            name: "Analytics",
-            href: "/analytics",
-            icon: TrendingUp,
-            current: location.pathname === "/analytics",
-        },
+        // {
+        //     name: "Analytics",
+        //     href: "/analytics",
+        //     icon: TrendingUp,
+        //     current: location.pathname === "/analytics",
+        // },
     ];
 
     // Admin-only navigation items
