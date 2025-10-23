@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Medicine;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class MedicineController extends Controller
 {
@@ -56,6 +56,7 @@ class MedicineController extends Controller
                 'stock' => $medicine->stock,
                 'minStock' => $medicine->min_stock,
                 'unit' => $medicine->unit,
+                'img' => $medicine->img ? asset($medicine->img) : null,
                 'expirationDate' => $medicine->expiration_date->format('Y-m-d'),
                 'description' => $medicine->description,
                 'status' => $medicine->status,
@@ -81,9 +82,20 @@ class MedicineController extends Controller
             'stock' => 'required|integer|min:0',
             'minStock' => 'required|integer|min:0',
             'unit' => 'required|in:tablet,capsule,bottle,box,tube,vial',
+            'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'expirationDate' => 'required|date|after:today',
             'description' => 'nullable|string',
         ]);
+
+        // Upload file ke public/assets/medicines
+        $imgPath = null;
+        if ($request->hasFile('img')) {
+            $file = $request->file('img');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $destination = public_path('assets/medicines');
+            $file->move($destination, $filename);
+            $imgPath = 'assets/medicines/' . $filename; // path relatif
+        }
 
         Medicine::create([
             'name' => $validated['name'],
@@ -92,6 +104,7 @@ class MedicineController extends Controller
             'stock' => $validated['stock'],
             'min_stock' => $validated['minStock'],
             'unit' => $validated['unit'],
+            'img' => $imgPath,
             'expiration_date' => $validated['expirationDate'],
             'description' => $validated['description'],
         ]);
@@ -108,9 +121,24 @@ class MedicineController extends Controller
             'stock' => 'required|integer|min:0',
             'minStock' => 'required|integer|min:0',
             'unit' => 'required|in:tablet,capsule,bottle,box,tube,vial',
+            'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'expirationDate' => 'required|date|after:today',
             'description' => 'nullable|string',
         ]);
+
+        // Jika user upload gambar baru
+        if ($request->hasFile('img')) {
+            // Hapus gambar lama kalau ada
+            if ($medicine->img && File::exists(public_path($medicine->img))) {
+                File::delete(public_path($medicine->img));
+            }
+
+            $file = $request->file('img');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $destination = public_path('assets/medicines');
+            $file->move($destination, $filename);
+            $medicine->img = 'assets/medicines/' . $filename;
+        }
 
         $medicine->update([
             'name' => $validated['name'],
@@ -121,6 +149,7 @@ class MedicineController extends Controller
             'unit' => $validated['unit'],
             'expiration_date' => $validated['expirationDate'],
             'description' => $validated['description'],
+            'img' => $medicine->img,
         ]);
 
         return redirect()->route('medicines.index')->with('success', 'Medicine updated successfully!');
@@ -128,6 +157,10 @@ class MedicineController extends Controller
 
     public function destroy(Medicine $medicine)
     {
+        if ($medicine->img && File::exists(public_path($medicine->img))) {
+            File::delete(public_path($medicine->img));
+        }
+
         $medicine->delete();
         return redirect()->route('medicines.index')->with('success', 'Medicine deleted successfully!');
     }

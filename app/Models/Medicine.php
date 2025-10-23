@@ -16,6 +16,7 @@ class Medicine extends Model
         'stock',
         'min_stock',
         'unit',
+        'img',
         'expiration_date',
         'description',
     ];

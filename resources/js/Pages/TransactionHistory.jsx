@@ -3,47 +3,26 @@ import { usePage, router } from "@inertiajs/react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "../components/ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "../components/ui/dialog";
-import {
-    History,
-    Search,
-    Filter,
-    Download,
-    Eye,
-    Calendar,
-    User,
-    Receipt,
-    Package,
-} from "lucide-react";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "../components/ui/dialog";
+import {History, Search, Filter, Download, Eye, Calendar, User, Receipt, Package,} from "lucide-react";
 import { toast } from "sonner";
-
 import DashboardLayout from "../Layouts/DashboardLayout";
+import axios from 'axios';
 
 const TransactionHistory = () => {
     const { props } = usePage();
     const { transactions: initialTransactions, filters: initialFilters } = props;
-
+    const [transactions, setTransactions] = useState(initialTransactions?.data || []);
     const [searchTerm, setSearchTerm] = useState(initialFilters?.search || "");
     const [dateRange, setDateRange] = useState(initialFilters?.date_range || "all");
     const [cashierFilter, setCashierFilter] = useState(initialFilters?.cashier || "all");
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showDetails, setShowDetails] = useState(false);
- const [transactions, setTransactions] = useState(initialTransactions?.data || []);
-
+    
+   
+   
     // Update transactions when props change
   useEffect(() => {
     setTransactions(initialTransactions?.data || []);
@@ -141,6 +120,24 @@ const TransactionHistory = () => {
         setSelectedTransaction(transaction);
         setShowDetails(true);
     };
+
+    const handleCheckout = async (checkoutData) => {
+        try {
+            const response = await axios.post('/checkout', checkoutData);
+            if (response.data.success) {
+            const newTransaction = response.data.transaction;
+            handleNewTransaction(newTransaction); // dari TransactionHistory.jsx
+            toast.success("Checkout berhasil!");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Checkout gagal!");
+        }
+    };
+
+
+
+
 
     const handleExportHistory = () => {
         const exportData = {

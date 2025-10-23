@@ -20,7 +20,8 @@ return new class extends Migration
             $table->decimal('discount_value', 10, 2)->default(0);
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total', 10, 2);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // cashier
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum("type", ["cashier", "online"])->default("cashier");
             $table->timestamps();
         });
     }

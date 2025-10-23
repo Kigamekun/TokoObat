@@ -54,6 +54,7 @@ const MedicineCatalog = () => {
         minStock: "",
         expirationDate: "",
         unit: "tablet",
+        img: "",
         description: "",
     });
 
@@ -138,6 +139,7 @@ const MedicineCatalog = () => {
         }
 
         router.post(route('medicines.store'), newMedicine, {
+            forceFormData: true,
             onSuccess: () => {
                 setNewMedicine({
                     name: "",
@@ -147,6 +149,7 @@ const MedicineCatalog = () => {
                     minStock: "",
                     expirationDate: "",
                     unit: "tablet",
+                    img: "",
                     description: "",
                 });
                 setShowAddModal(false);
@@ -191,6 +194,7 @@ const MedicineCatalog = () => {
                     minStock: "",
                     expirationDate: "",
                     unit: "tablet",
+                    img: "",
                     description: "",
                 });
                 setEditingMedicine(null);
@@ -601,6 +605,15 @@ const MedicineCatalog = () => {
                                     value={newMedicine.expirationDate}
                                     onChange={(e) => setNewMedicine({ ...newMedicine, expirationDate: e.target.value })}
                                     data-testid="medicine-expiry-input"
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="medicine-img">Image</Label>
+                                <Input
+                                    id="medicine-img"
+                                    type="file"
+                                    onChange={(e) => setNewMedicine({ ...newMedicine, img: e.target.files[0] })}
+                                    data-testid="medicine-img-input"
                                 />
                             </div>
                             <div className="md:col-span-2">

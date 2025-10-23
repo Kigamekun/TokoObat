@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('stock');
             $table->integer('min_stock');
             $table->string('unit');
+            $table->string('img');
             $table->date('expiration_date');
             $table->text('description')->nullable();
             $table->timestamps();
