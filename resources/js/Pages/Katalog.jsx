@@ -56,7 +56,7 @@ export default function Katalog() {
         <div className="text-center mb-12">
           <h1 className="heading-1 mb-4">Katalog Obat</h1>
           <p className="body-large text-gray-600 max-w-2xl mx-auto">
-            Temukan berbagai macam obat, vitamin, dan suplemen kesehatan yang Anda butuhkan. 
+            Temukan berbagai macam obat, vitamin, dan suplemen kesehatan yang Anda butuhkan.
             Semua produk dijamin asli dan berkualitas.
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function Katalog() {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
               />
             </div>
-            
+
             {/* Filter Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -102,7 +102,7 @@ export default function Katalog() {
                   ))}
                 </select>
               </div>
-              
+
               {/* Sort By */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Urutkan Berdasarkan</label>
@@ -116,7 +116,7 @@ export default function Katalog() {
                   <option value="stock">Stok</option>
                 </select>
               </div>
-              
+
               {/* Sort Order */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Urutan</label>
@@ -130,7 +130,7 @@ export default function Katalog() {
                 </select>
               </div>
             </div>
-            
+
             {/* Clear Filters */}
             {(searchTerm || selectedCategory !== 'Semua') && (
               <button
@@ -163,7 +163,7 @@ export default function Katalog() {
 
         {/* Medicine Grid */}
         {filteredMedicines.length > 0 ? (
-          <div className="medicine-grid">
+          <div className="flex flex-wrap gap-5 justify-between">
             {filteredMedicines.map(medicine => (
               <MedicineCard key={medicine.id} medicine={medicine} />
             ))}
@@ -190,8 +190,8 @@ export default function Katalog() {
         )}
       </div>
     </div>
-    
-    
+
+
     </>
   );
 };

@@ -12,14 +12,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 
-Route::get('/beranda', function () {
+Route::get('/', function () {
     $featuredMedicines = Medicine::orderBy('created_at', 'desc')->take(6)->get();
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
-        'featuredMedicines' => $featuredMedicines,      
+        'featuredMedicines' => $featuredMedicines,
     ]);
 });
 
@@ -82,9 +82,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    
 
-  
+
+
 
 
     // Medicines

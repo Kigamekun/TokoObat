@@ -19,48 +19,48 @@ export default function Home() {
           {/* Background with Images */}
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-white to-teal-100"></div>
-            
+
             {/* Floating Images */}
             <div className="absolute top-20 right-10 w-64 h-48 rounded-3xl overflow-hidden shadow-2xl rotate-6 transform hover:rotate-3 transition-transform duration-700">
-              <img 
+              <img
                 src="https://images.unsplash.com/photo-1576602976047-174e57a47881?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxwaGFybWFjeXxlbnwwfHx8fDE3NTk0OTUxMDR8MA&ixlib=rb-4.1.0&q=85"
                 alt="Modern Pharmacy"
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             <div className="absolute bottom-32 left-10 w-56 h-40 rounded-3xl overflow-hidden shadow-2xl -rotate-6 transform hover:-rotate-3 transition-transform duration-700">
-              <img 
+              <img
                 src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxoZWFsdGhjYXJlJTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc1OTQ5NTA5OHww&ixlib=rb-4.1.0&q=85"
                 alt="Healthcare Professional"
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             <div className="absolute top-1/2 right-32 w-48 h-36 rounded-3xl overflow-hidden shadow-2xl rotate-12 transform hover:rotate-6 transition-transform duration-700">
-              <img 
+              <img
                 src="https://images.unsplash.com/photo-1580281657527-47f249e8f4df?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHw0fHxwaGFybWFjeXxlbnwwfHx8fDE3NTk0OTUxMDR8MA&ixlib=rb-4.1.0&q=85"
                 alt="Professional Pharmacist"
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             {/* Decorative Elements */}
             <div className="absolute top-40 left-1/4 w-32 h-32 bg-gradient-to-br from-teal-200 to-teal-300 rounded-full opacity-20 animate-pulse"></div>
             <div className="absolute bottom-40 right-1/4 w-24 h-24 bg-gradient-to-br from-green-200 to-green-300 rounded-full opacity-20 animate-pulse delay-1000"></div>
             <div className="absolute top-1/3 left-1/3 w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full opacity-20 animate-pulse delay-500"></div>
           </div>
-          
+
           {/* Content */}
           <br />
           <br />
           <div className="relative z-10 container max-w-5xl mx-auto text-center px-6 py-6">
-            
+
             {/* <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 mb-8 shadow-lg">
               <Award className="h-5 w-5 text-teal-600" />
               <span className="text-sm font-medium text-gray-700">Apotek Terpercaya Sejak 2010</span>
             </div> */}
-            
+
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-teal-600 via-green-600 to-teal-700 bg-clip-text text-transparent">
                 Mitra Toko Obat
@@ -68,32 +68,32 @@ export default function Home() {
               <br />
               <span className="text-gray-800">JGroup</span>
             </h1>
-            
+
             <p className="text-2xl text-gray-600 mb-6 max-w-3xl mx-auto font-light">
               Mitra Terpercaya untuk Kesehatan Anda
             </p>
-            
+
             <p className="text-lg text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Kami menyediakan obat-obatan berkualitas, vitamin, dan suplemen kesehatan 
+              Kami menyediakan obat-obatan berkualitas, vitamin, dan suplemen kesehatan
               dengan layanan yang aman dan terpercaya. Pesan online, bayar dan ambil di apotek.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-              <Link 
-                href="/katalogobat" 
+              <Link
+                href="/katalogobat"
                 className="group bg-gradient-to-r from-teal-600 to-teal-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
               >
                 Lihat Katalog Obat
                 <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link 
-                to="#features" 
+              <Link
+                to="#features"
                 className="bg-white/90 backdrop-blur text-gray-800 border border-gray-200 px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:shadow-lg transition-all duration-300"
               >
                 Pelajari Lebih Lanjut
               </Link>
             </div>
-            
+
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
@@ -131,7 +131,7 @@ export default function Home() {
                 Komitmen kami adalah memberikan pelayanan terbaik untuk kesehatan Anda dan keluarga
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               <div className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                 <div className="relative mb-6">
@@ -144,7 +144,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">Obat Berkualitas</h3>
                 <p className="text-gray-600 text-center leading-relaxed">
-                  Semua obat yang kami jual adalah obat resmi dan berkualitas tinggi, 
+                  Semua obat yang kami jual adalah obat resmi dan berkualitas tinggi,
                   tanpa obat keras yang memerlukan resep dokter. Dijamin asli dan aman.
                 </p>
                 <div className="mt-6 flex items-center justify-center gap-2">
@@ -156,7 +156,7 @@ export default function Home() {
                   <span className="text-sm text-gray-500 ml-1">5.0 Rating</span>
                 </div>
               </div>
-              
+
               <div className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 md:mt-8">
                 <div className="relative mb-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
@@ -168,7 +168,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">Pelayanan Cepat</h3>
                 <p className="text-gray-600 text-center leading-relaxed">
-                  Proses pemesanan online yang mudah dan cepat. 
+                  Proses pemesanan online yang mudah dan cepat.
                   Pesan hari ini, siap diambil dalam 30 menit. Layanan express untuk kebutuhan mendesak.
                 </p>
                 <div className="mt-6 text-center">
@@ -178,7 +178,7 @@ export default function Home() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                 <div className="relative mb-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
@@ -190,7 +190,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">Lokasi Strategis</h3>
                 <p className="text-gray-600 text-center leading-relaxed">
-                  Apotek kami terletak di lokasi yang mudah dijangkau 
+                  Apotek kami terletak di lokasi yang mudah dijangkau
                   dengan area parkir yang luas. Akses mudah dari berbagai arah transportasi.
                 </p>
                 <div className="mt-6 text-center">
@@ -203,14 +203,14 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
+
         {/* Trust Section */}
         <section className="py-20 bg-gradient-to-r from-teal-600 to-green-600">
           <div className="container">
             <div className="text-center text-white">
               <h2 className="text-4xl font-bold mb-6">Dipercaya Ribuan Pelanggan</h2>
               <p className="text-xl opacity-90 mb-12 max-w-3xl mx-auto">
-                Dengan pengalaman lebih dari 13 tahun, kami telah melayani ribuan pelanggan 
+                Dengan pengalaman lebih dari 13 tahun, kami telah melayani ribuan pelanggan
                 dengan kepuasan dan kepercayaan tinggi
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
@@ -247,11 +247,11 @@ export default function Home() {
                 Obat Pilihan Utama
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Berikut adalah produk kesehatan yang paling sering dipesan dan dipercaya 
+                Berikut adalah produk kesehatan yang paling sering dipesan dan dipercaya
                 oleh ribuan pelanggan kami setiap harinya
               </p>
             </div>
-            
+
              <div className="medicine-grid">
                 {featuredMedicines.map((medicine, index) => (
                   <div key={medicine.id} className="transform hover:scale-105 transition-transform duration-300">
@@ -266,18 +266,18 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-            
+
             <div className="text-center">
               <div className="bg-white rounded-3xl shadow-xl p-8 max-w-2xl mx-auto mb-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Tidak Menemukan yang Anda Cari?
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Kami memiliki lebih dari 500 produk kesehatan berkualitas. 
+                  Kami memiliki lebih dari 500 produk kesehatan berkualitas.
                   Jelajahi katalog lengkap untuk menemukan obat yang Anda butuhkan.
                 </p>
-                <Link 
-                  href="/katalogobat" 
+                <Link
+                  href="/katalogobat"
                   className="inline-flex items-center gap-3 bg-gradient-to-r from-teal-600 to-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                 >
                   Jelajahi Katalog Lengkap
@@ -300,11 +300,11 @@ export default function Home() {
                 Kunjungi Apotek Kami
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Kami siap melayani Anda dengan fasilitas modern dan tim profesional 
+                Kami siap melayani Anda dengan fasilitas modern dan tim profesional
                 yang berpengalaman di bidang farmasi
               </p>
             </div>
-            
+
             <div className="grid lg:grid-cols-2 gap-12 items-start">
               {/* Contact Information */}
               <div className="space-y-8">
@@ -316,7 +316,7 @@ export default function Home() {
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">Alamat Lengkap</h3>
                       <p className="text-gray-600 leading-relaxed">
-                        Jl. Raya Kesehatan No. 123, Kelurahan Sehat, 
+                        Jl. Raya Kesehatan No. 123, Kelurahan Sehat,
                         Kecamatan Obat, Jakarta Selatan 12345
                       </p>
                       <p className="text-sm text-teal-600 mt-2 font-medium">
@@ -325,7 +325,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="flex items-start gap-6">
                     <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -342,7 +342,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="flex items-start gap-6">
                     <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -368,7 +368,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="flex items-start gap-6">
                     <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -382,7 +382,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Map */}
               <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
                 <div className="p-6 border-b">
@@ -390,13 +390,13 @@ export default function Home() {
                   <p className="text-gray-600">Mudah dijangkau dari berbagai arah</p>
                 </div>
                 <div className="relative h-96">
-                  <iframe 
+                  <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d106.8195613!3d-6.2352575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x5371bf0fdad786a2!2sJakarta%2C%20Indonesia!5e0!3m2!1sen!2s!4v1234567890123"
-                    width="100%" 
-                    height="100%" 
-                    style={{ border: 0 }} 
-                    allowFullScreen="" 
-                    loading="lazy" 
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen="true"
+                    loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     title="Lokasi Apotek Mitra Toko Obat"
                     className="rounded-b-3xl"
@@ -404,7 +404,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             {/* CTA Section */}
             <div className="mt-20 text-center">
               <div className="bg-gradient-to-r from-teal-600 to-green-600 rounded-3xl p-12 shadow-2xl">
@@ -412,11 +412,11 @@ export default function Home() {
                   Siap Berbelanja Obat?
                 </h3>
                 <p className="text-xl text-teal-100 mb-8 max-w-2xl mx-auto">
-                  Mulai pesan obat sekarang juga dan rasakan kemudahan berbelanja 
+                  Mulai pesan obat sekarang juga dan rasakan kemudahan berbelanja
                   dengan sistem pre-order kami yang aman dan terpercaya.
                 </p>
-                <Link 
-                  to="/katalog" 
+                <Link
+                  to="/katalog"
                   className="inline-flex items-center gap-3 bg-white text-teal-600 px-8 py-4 rounded-full text-lg font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                 >
                   Mulai Belanja Sekarang
@@ -442,7 +442,7 @@ export default function Home() {
                     <span className="text-xl font-bold">Mitra Toko Obat</span>
                   </div>
                   <p className="text-gray-300 mb-6 leading-relaxed">
-                    Mitra terpercaya untuk kesehatan Anda dan keluarga sejak 2010. 
+                    Mitra terpercaya untuk kesehatan Anda dan keluarga sejak 2010.
                     Menyediakan obat-obatan berkualitas dengan pelayanan profesional.
                   </p>
                   <div className="flex gap-4">
@@ -478,8 +478,8 @@ export default function Home() {
                       </Link>
                     </li>
                     <li>
-                      <section 
-                        id="tentang" 
+                      <section
+                        id="tentang"
                         className="py-20 text-gray-300 hover:text-white transition-colors duration-300"
                       >
                         <div className="flex items-center gap-2">
@@ -489,8 +489,8 @@ export default function Home() {
                       </section>
                     </li>
                     <li>
-                      <section 
-                        id="kontak" 
+                      <section
+                        id="kontak"
                         className="py-20 text-gray-300 hover:text-white transition-colors duration-300"
                       >
                         <div className="flex items-center gap-2">
