@@ -20,9 +20,9 @@ const TransactionHistory = () => {
     const [cashierFilter, setCashierFilter] = useState(initialFilters?.cashier || "all");
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showDetails, setShowDetails] = useState(false);
-    
-   
-   
+
+
+
     // Update transactions when props change
   useEffect(() => {
     setTransactions(initialTransactions?.data || []);
@@ -372,6 +372,9 @@ const TransactionHistory = () => {
                                         Total
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Description
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Discount
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -422,6 +425,15 @@ const TransactionHistory = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                             {formatCurrency(transaction.total)}
                                         </td>
+
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {transaction.description ? (
+                                                <span className="text-gray-900">{transaction.description}</span>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {transaction.discount_value > 0 ? (
                                                 <span className="text-green-600">

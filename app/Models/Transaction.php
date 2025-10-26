@@ -13,6 +13,8 @@ class Transaction extends Model
         'transaction_code',
         'customer_name',
         'customer_phone',
+        'email',
+        'description',
         'discount_type',
         'discount_value',
         'subtotal',

@@ -13,8 +13,10 @@ class CheckoutController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_name' => 'nullable|string|max:255',
-            'customer_phone' => 'nullable|string|max:20',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'description' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
             'items.*.medicine_id' => 'required|exists:medicines,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -34,24 +36,20 @@ class CheckoutController extends Controller
                 ];
             }
 
-            // Hitung nomor antrian
-            $latestTransaction = Transaction::where('type', 'online')->latest()->first();
-            $queueNumber = $latestTransaction ? $latestTransaction->queue_number + 1 : 1;
-            $queueNumberFormatted = str_pad($queueNumber, 4, '0', STR_PAD_LEFT);
-
-            // Simpan transaksi
+            // Simpan transaksi (tanpa queue_number)
             $transaction = Transaction::create([
                 'transaction_code' => 'TXN' . now()->format('YmdHis'),
-                'queue_number' => $queueNumberFormatted,
-                'customer_name' => $validated['customer_name'] ?? 'Guest',
-                'customer_phone' => $validated['customer_phone'] ?? null,
+                'customer_name' => $validated['customer_name'],
+                'customer_phone' => $validated['customer_phone'],
+                'email' => $validated['email'] ?? null,
+                'description' => $validated['description'] ?? null,
                 'subtotal' => $subtotal,
                 'total' => $subtotal,
-                'type' => 'online',
-                'user_id' => null,
+                'type' => 'online', // bisa kamu ganti sesuai kebutuhan
+                'user_id' => auth()->check() ? auth()->id() : null, // jika login isi id, jika guest null
             ]);
 
-            // Simpan transaction items (tanpa mengurangi stock)
+            // Simpan item transaksi
             foreach ($items as $item) {
                 TransactionItem::create([
                     'transaction_id' => $transaction->id,
@@ -64,26 +62,11 @@ class CheckoutController extends Controller
             return $transaction;
         });
 
-        return response()->json([
-            'success' => true,
-            'transaction' => [
-                'id' => $transaction->id,
-                'transaction_code' => $transaction->transaction_code,
-                'queue_number' => $transaction->queue_number,
-                'customer_name' => $transaction->customer_name,
-                'customer_phone' => $transaction->customer_phone,
-                'subtotal' => $transaction->subtotal,
-                'total' => $transaction->total,
-                'items' => $transaction->items->map(function ($item) {
-                    return [
-                        'medicine' => [
-                            'name' => $item->medicine->name,
-                        ],
-                        'quantity' => $item->quantity,
-                        'price' => $item->price,
-                    ];
-                }),
-            ],
+        // ✅ Kirim langsung ke Inertia response
+        return redirect()->back()->with('transaction', [
+            'transaction_code' => $transaction->transaction_code,
         ]);
     }
+
+
 }

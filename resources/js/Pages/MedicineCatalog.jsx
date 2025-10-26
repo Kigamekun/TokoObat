@@ -235,6 +235,25 @@ const MedicineCatalog = () => {
 
         return (
             <Card className="p-4 hover:shadow-lg transition-all duration-200">
+
+                <div className="medicine-item flex flex-col items-center">
+                    {medicine.img ? (
+                    <img
+                        src={medicine.img}
+                        alt={medicine.name}
+                        className="w-full h-48 object-cover"
+                    />
+                    ) : (
+                    <div className="w-full h-48 flex items-center justify-center text-gray-400 text-sm bg-gray-100 rounded-lg">
+                        No Image
+                    </div>
+                    )}
+                    <div className="p-4 text-center space-y-2">
+                        <h3 className="text-base font-semibold text-gray-800"></h3>
+                    </div>
+
+                </div>
+
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 mb-1">

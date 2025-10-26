@@ -25,6 +25,7 @@ class TransactionController extends Controller
                     'stock' => $medicine->stock,
                     'category' => $medicine->category,
                     'unit' => $medicine->unit,
+
                 ];
             });
 

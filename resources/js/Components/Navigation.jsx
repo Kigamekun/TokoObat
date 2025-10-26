@@ -33,7 +33,7 @@ export const Navigation = () => {
       </div>
 
       {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center gap-6">
+      <div className="hidden md:flex items-center gap-6 transform -translate-x-16">
         <Link
           href="/"
           className={`nav-link ${

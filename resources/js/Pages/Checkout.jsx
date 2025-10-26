@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 import { ArrowLeft, Check, MapPin, Clock, Phone } from 'lucide-react';
 import { mockCart } from '../data/mock';
@@ -15,9 +15,15 @@ export default function Checkout() {
     email: '',
     notes: ''
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const { flash } = usePage().props;
+  const transaction = flash?.transaction;
+
+
+
 
 
   const formatPrice = (price) => {
@@ -36,20 +42,47 @@ export default function Checkout() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate order processing
-    setTimeout(() => {
-      const newOrderId = 'MTO' + Date.now().toString().slice(-6);
-      setOrderId(newOrderId);
-      setOrderComplete(true);
-      setIsSubmitting(false);
-      
-      // Clear cart
-      mockCart.clear();
-    }, 2000);
-  };
+  e.preventDefault();
+
+  Inertia.post('/checkout', {
+    customer_name: formData.name,
+    customer_phone: formData.phone,
+    email: formData.email,
+    description: formData.notes,
+    items: mockCart.items.map(item => ({
+      medicine_id: item.id,
+      quantity: item.quantity,
+    })),
+  }, {
+    preserveScroll: true,
+    preserveState: true,
+
+    onStart: () => setIsSubmitting(true),
+
+    onFinish: () => setIsSubmitting(false),
+
+    onSuccess: (page) => {
+      const transaction = page.props.flash?.transaction;
+
+      // ✅ Cek apakah backend benar-benar mengembalikan data transaksi
+      if (transaction?.transaction_code) {
+        setOrderComplete(true);
+        setOrderId(transaction.transaction_code);
+        mockCart.clear();
+      } else {
+        setOrderComplete(false);
+        console.warn("Checkout sukses tapi transaction_code tidak diterima.");
+      }
+    },
+
+    onError: (errors) => {
+      console.error("Checkout gagal:", errors);
+      setOrderComplete(false);
+      alert('Terjadi kesalahan saat checkout.');
+    },
+  });
+};
+
 
   if (mockCart.items.length === 0 && !orderComplete) {
     return (
@@ -60,7 +93,7 @@ export default function Checkout() {
             <p className="text-gray-600 mb-8">
               Tidak ada produk dalam keranjang untuk di-checkout.
             </p>
-            <Link to="/katalog" className="btn-primary">
+            <Link href="/katalogObat" className="btn-primary">
               Mulai Belanja
             </Link>
           </div>
@@ -68,6 +101,7 @@ export default function Checkout() {
       </div>
     );
   }
+
 
   if (orderComplete) {
     return (
@@ -77,11 +111,11 @@ export default function Checkout() {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Check className="h-10 w-10 text-green-600" />
             </div>
-            
+
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Pesanan Berhasil Diterima!
             </h1>
-            
+
             <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8">
               <p className="text-lg text-gray-600 mb-4">
                 Terima kasih atas pesanan Anda. Pesanan dengan nomor:
@@ -90,10 +124,10 @@ export default function Checkout() {
                 #{orderId}
               </p>
               <p className="text-gray-700 mb-6">
-                telah diterima dan sedang diproses. Silakan datang ke apotek kami 
+                telah diterima dan sedang diproses. Silakan datang ke apotek kami
                 untuk melakukan pembayaran dan pengambilan obat.
               </p>
-              
+
               {/* Store Info */}
               <div className="bg-gray-50 rounded-lg p-6 text-left">
                 <h3 className="font-semibold text-gray-900 mb-4 text-center">
@@ -105,7 +139,7 @@ export default function Checkout() {
                     <div>
                       <p className="font-medium">Alamat</p>
                       <p className="text-gray-600 text-sm">
-                        Jl. Raya Kesehatan No. 123, Kelurahan Sehat, 
+                        Jl. Raya Kesehatan No. 123, Kelurahan Sehat,
                         Kecamatan Obat, Jakarta Selatan 12345
                       </p>
                     </div>
@@ -130,7 +164,7 @@ export default function Checkout() {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <Link to="/" className="btn-primary">
                 Kembali ke Beranda
@@ -172,7 +206,7 @@ export default function Checkout() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">
                   Informasi Pemesan
                 </h3>
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -188,7 +222,7 @@ export default function Checkout() {
                       placeholder="Masukkan nama lengkap Anda"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nomor Telepon *
@@ -204,7 +238,7 @@ export default function Checkout() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email (Opsional)
@@ -218,7 +252,7 @@ export default function Checkout() {
                     placeholder="email@example.com"
                   />
                 </div>
-                
+
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Catatan (Opsional)
@@ -233,7 +267,7 @@ export default function Checkout() {
                   />
                 </div>
               </div>
-              
+
               <div className="bg-blue-50 rounded-2xl border border-blue-200 p-6">
                 <h4 className="font-semibold text-blue-900 mb-3">
                   Informasi Penting:
@@ -245,7 +279,7 @@ export default function Checkout() {
                   <li>• Bawa kartu identitas untuk verifikasi</li>
                 </ul>
               </div>
-              
+
               <button
                 type="submit"
                 disabled={isSubmitting || !formData.name || !formData.phone}
@@ -266,13 +300,13 @@ export default function Checkout() {
               <h3 className="text-xl font-semibold text-gray-900 mb-6">
                 Ringkasan Pesanan
               </h3>
-              
+
               <div className="space-y-4 mb-6">
                 {mockCart.items.map((item) => (
                   <div key={item.id} className="flex gap-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      <img 
-                        src={'/' + item.img} 
+                      <img
+                        src={'/' + item.img}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
@@ -291,7 +325,7 @@ export default function Checkout() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="border-t pt-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Subtotal</span>

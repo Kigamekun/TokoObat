@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('transaction_code')->unique(); // Format: TXN0001, dll.
             $table->string('customer_name')->nullable();
             $table->string('customer_phone')->nullable();
+            $table->string('description')->nullable();
+            $table->string('email')->nullable();
             $table->enum('discount_type', ['none', 'percentage', 'fixed'])->default('none');
             $table->decimal('discount_value', 10, 2)->default(0);
             $table->decimal('subtotal', 10, 2);
