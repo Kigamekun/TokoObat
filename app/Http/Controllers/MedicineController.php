@@ -82,7 +82,7 @@ class MedicineController extends Controller
             'stock' => 'required|integer|min:0',
             'minStock' => 'required|integer|min:0',
             'unit' => 'required|in:tablet,capsule,bottle,box,tube,vial',
-            'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'img' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
             'expirationDate' => 'required|date|after:today',
             'description' => 'nullable|string',
         ]);
