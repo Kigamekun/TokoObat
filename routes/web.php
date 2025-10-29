@@ -42,9 +42,14 @@ Route::get('/checkout', function () {
     return Inertia::render('Checkout', );
 });
 
+Route::get('/checkout/{transaction_code}', [CheckoutController::class, 'show']);
 
 // Route publik untuk checkout (guest)
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+
+
+Route::patch('/transactions/{transaction}/status', [TransactionController::class, 'updateStatus'])->name('transactions.updateStatus');
 
 // Untuk dashboard admin (lihat & kelola obat)
 // Route::get('/medicines', [KatalogController::class, 'index'])->name('medicines.index');

@@ -22,8 +22,9 @@ return new class extends Migration
             $table->decimal('discount_value', 10, 2)->default(0);
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total', 10, 2);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
             $table->enum("type", ["cashier", "online"])->default("cashier");
+            $table->enum("status", ["pending","complete"])->default("pending");
             $table->timestamps();
         });
     }

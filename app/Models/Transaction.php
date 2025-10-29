@@ -17,6 +17,7 @@ class Transaction extends Model
         'description',
         'discount_type',
         'discount_value',
+        'status',
         'subtotal',
         'total',
         'user_id',

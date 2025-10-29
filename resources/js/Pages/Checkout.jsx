@@ -41,47 +41,51 @@ export default function Checkout() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
   e.preventDefault();
+  setIsSubmitting(true);
 
-  Inertia.post('/checkout', {
-    customer_name: formData.name,
-    customer_phone: formData.phone,
-    email: formData.email,
-    description: formData.notes,
-    items: mockCart.items.map(item => ({
-      medicine_id: item.id,
-      quantity: item.quantity,
-    })),
-  }, {
-    preserveScroll: true,
-    preserveState: true,
+  try {
+    // 📨 Kirim data ke backend
+    const res = await axios.post('/checkout', {
+      customer_name: formData.name,
+      customer_phone: formData.phone,
+      email: formData.email,
+      description: formData.notes,
+      items: mockCart.items.map(item => ({
+        medicine_id: item.id,
+        quantity: item.quantity,
+      })),
+    });
 
-    onStart: () => setIsSubmitting(true),
+    // ✅ Jika backend mengembalikan transaction_code
+    const transaction = res.data?.transaction;
 
-    onFinish: () => setIsSubmitting(false),
+    if (transaction?.transaction_code) {
+      try {
+        // 🔁 Ambil detail transaksi setelah checkout
 
-    onSuccess: (page) => {
-      const transaction = page.props.flash?.transaction;
+          const data = transaction;
+          setOrderComplete(true);
+          setOrderId(data.transaction_code);
+          mockCart.clear();
+          console.log('Detail transaksi:', data);
 
-      // ✅ Cek apakah backend benar-benar mengembalikan data transaksi
-      if (transaction?.transaction_code) {
-        setOrderComplete(true);
-        setOrderId(transaction.transaction_code);
-        mockCart.clear();
-      } else {
-        setOrderComplete(false);
-        console.warn("Checkout sukses tapi transaction_code tidak diterima.");
+      } catch (err) {
+        console.error('Gagal mengambil data transaksi:', err);
+        alert('Checkout berhasil, tapi gagal mengambil detail transaksi.');
       }
-    },
-
-    onError: (errors) => {
-      console.error("Checkout gagal:", errors);
-      setOrderComplete(false);
-      alert('Terjadi kesalahan saat checkout.');
-    },
-  });
+    } else {
+      console.warn('Checkout sukses tapi transaction_code tidak diterima.');
+    }
+  } catch (error) {
+    console.error('Checkout gagal:', error);
+    alert('Terjadi kesalahan saat checkout.');
+  } finally {
+    setIsSubmitting(false);
+  }
 };
+
 
 
   if (mockCart.items.length === 0 && !orderComplete) {
@@ -129,6 +133,42 @@ export default function Checkout() {
               </p>
 
               {/* Store Info */}
+
+              <div className="bg-gray-50 rounded-lg p-6 text-left">
+                <h3 className="font-semibold text-gray-900 mb-4 text-center">
+                  Informasi Apotek
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-teal-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Alamat</p>
+                      <p className="text-gray-600 text-sm">
+                        Jl. Raya Kesehatan No. 123, Kelurahan Sehat,
+                        Kecamatan Obat, Jakarta Selatan 12345
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-teal-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Jam Operasional</p>
+                      <p className="text-gray-600 text-sm">
+                        Senin-Sabtu: 08.00-22.00<br />
+                        Minggu: 08.00-20.00
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-teal-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Telepon</p>
+                      <p className="text-gray-600 text-sm">+62 21 1234 5678</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-gray-50 rounded-lg p-6 text-left">
                 <h3 className="font-semibold text-gray-900 mb-4 text-center">
                   Informasi Apotek
@@ -348,3 +388,5 @@ export default function Checkout() {
     </>
   );
 };
+
+

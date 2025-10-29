@@ -93,6 +93,25 @@ const TransactionHistory = () => {
         return () => clearTimeout(timeoutId);
     }, [searchTerm, dateRange, cashierFilter]);
 
+    const handleUpdateStatus = async (transactionId, newStatus) => {
+        try {
+            const response = await axios.patch(`/transactions/${transactionId}/status`, {
+                status: newStatus,
+            });
+            if (response.data.success) {
+                // Update the transaction status in local state
+                setTransactions((prevTransactions) =>
+                    prevTransactions.map((t) =>
+                        t.id === transactionId ? { ...t, status: newStatus } : t
+                    )
+                );
+                toast.success("Transaction status updated successfully!");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to update transaction status.");
+        }
+    }
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
@@ -378,6 +397,9 @@ const TransactionHistory = () => {
                                         Discount
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Cashier
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -443,6 +465,25 @@ const TransactionHistory = () => {
                                                 <span className="text-gray-400">-</span>
                                             )}
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {transaction.status === 'pending' ? (
+
+                                                <Button
+                                                    onClick={() => handleUpdateStatus(transaction.id, 'complete')}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-green-600 hover:text-green-700"
+                                                >
+                                                    Mark as Complete
+                                                </Button>
+
+                                            ) : (
+                                                <Badge className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                                    Completed
+                                                </Badge>
+                                            )}
+                                        </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {transaction.user?.name || 'Unknown'}
                                         </td>

@@ -21,6 +21,7 @@ class CheckoutController extends Controller
             'items.*.medicine_id' => 'required|exists:medicines,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
+        
 
         $transaction = DB::transaction(function () use ($validated) {
             $subtotal = 0;
@@ -63,10 +64,27 @@ class CheckoutController extends Controller
         });
 
         // ✅ Kirim langsung ke Inertia response
-        return redirect()->back()->with('transaction', [
-            'transaction_code' => $transaction->transaction_code,
+            return response()->json([
+            'success' => true,
+            'transaction' => [
+                'transaction_code' => $transaction->transaction_code,
+                'customer_name' => $transaction->customer_name,
+                'customer_phone' => $transaction->customer_phone,
+                'email' => $transaction->email,
+                'description' => $transaction->description,
+                'subtotal' => $transaction->subtotal,
+                'total' => $transaction->total,
+                'created_at' => $transaction->created_at->format('Y-m-d H:i:s'),
+                'items' => $transaction->items->map(function ($item) {
+                    return [
+                        'medicine_id' => $item->medicine_id,
+                        'name' => $item->medicine->name ?? null,
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'subtotal' => $item->quantity * $item->price,
+                    ];
+                }),
+            ]
         ]);
     }
-
-
 }

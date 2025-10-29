@@ -90,6 +90,7 @@ class TransactionController extends Controller
                     'subtotal' => $subtotal,
                     'total' => $total,
                     'user_id' => Auth::id(),
+                    'status'=> 'complete'
                 ]);
 
                 // Create transaction items and update stock
@@ -139,7 +140,51 @@ class TransactionController extends Controller
         }
     }
 
-    // Di dalam TransactionController yang sudah ada, tambahkan:
+
+
+    public function updateStatus(Request $request, Transaction $transaction)
+{
+    $validated = $request->validate([
+        'status' => 'required|in:pending,complete',
+    ]);
+
+    DB::transaction(function () use ($validated, $transaction) {
+        $transaction->status = $validated['status'];
+        $transaction->save();
+
+        // ✅ Jika status berubah menjadi 'complete', kurangi stok obat
+        if ($validated['status'] === 'complete') {
+            $items = $transaction->items()->with('medicine')->get();
+
+            foreach ($items as $item) {
+                $medicine = $item->medicine;
+
+                // Pastikan data medicine ada
+                if (!$medicine) {
+                    continue;
+                }
+
+                // Pastikan stok cukup
+                if ($medicine->stock < $item->quantity) {
+                    throw new \Exception("Stok untuk {$medicine->name} tidak mencukupi.");
+                }
+
+                // Kurangi stok obat
+                $medicine->stock -= $item->quantity;
+                $medicine->save();
+            }
+        }
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Transaction status updated successfully.',
+        'transaction' => [
+            'id' => $transaction->id,
+            'status' => $transaction->status,
+        ],
+    ]);
+}
 
     public function history(Request $request)
     {
