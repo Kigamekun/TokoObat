@@ -6,7 +6,7 @@ import { Input } from "../components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "../components/ui/dialog";
-import {History, Search, Filter, Download, Eye, Calendar, User, Receipt, Package,} from "lucide-react";
+import {History, Search, Filter,Printer, Download, Eye, Calendar, User, Receipt, Package,} from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import axios from 'axios';
@@ -155,6 +155,92 @@ const TransactionHistory = () => {
     };
 
 
+const buildReceiptHTML = (tx) => {
+  const currency = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  const date = new Date(tx.created_at);
+  const tanggal = date.toLocaleDateString("id-ID", { year:"numeric", month:"short", day:"numeric" });
+  const jam = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+  const itemsRows = (tx.items || []).map(i => `
+    <tr>
+      <td class="name">${i?.medicine?.name || "-"}</td>
+      <td class="qty">x${i.quantity}</td>
+      <td class="price">${currency(i.price)}</td>
+      <td class="line">${currency(i.price * i.quantity)}</td>
+    </tr>
+  `).join("");
+
+  return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Receipt ${tx.transaction_code}</title>
+<style>
+  *{box-sizing:border-box}
+  body{font:14px/1.4 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; color:#111; margin:0; padding:0;}
+  .wrap{width:320px; margin:0 auto; padding:12px 10px;}
+  h1{font-size:16px; margin:0; text-align:center;}
+  .muted{color:#666; font-size:12px; text-align:center; margin:4px 0 10px}
+  .row{display:flex; justify-content:space-between; margin:2px 0; font-size:13px}
+  hr{border:0; border-top:1px dashed #999; margin:10px 0}
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  td{padding:4px 0; vertical-align:top}
+  td.name{width:48%}
+  td.qty{width:10%; text-align:center}
+  td.price{width:20%; text-align:right}
+  td.line{width:22%; text-align:right}
+  .totals .row{font-weight:600}
+  .grand{font-size:15px}
+  .center{text-align:center; margin-top:8px; font-size:12px; color:#444}
+  @page{ size:auto; margin:8mm }
+  @media print { body{ background:#fff } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Mitra Toko Obat JGroup</h1>
+    <div class="muted">Transaction Receipt</div>
+
+    <div class="row"><div><b>ID</b></div><div>${tx.transaction_code}</div></div>
+    <div class="row"><div><b>Tanggal</b></div><div>${tanggal} ${jam}</div></div>
+    <div class="row"><div><b>Kasir</b></div><div>${tx?.user?.name || "-"}</div></div>
+    ${tx.customer_name || tx.customer_phone ? `
+      <div class="row"><div><b>Pelanggan</b></div><div>${tx.customer_name || "-"}</div></div>
+      ${tx.customer_phone ? `<div class="row"><div><b>Telp</b></div><div>${tx.customer_phone}</div></div>` : ``}
+    ` : ``}
+
+    <hr>
+    <table>
+      <tbody>
+        ${itemsRows}
+      </tbody>
+    </table>
+
+    <hr>
+    <div class="totals">
+      <div class="row"><div>Subtotal</div><div>${currency(tx.subtotal || 0)}</div></div>
+      ${tx.discount_value > 0 ? `<div class="row"><div>Diskon</div><div>-${currency(tx.discount_value)}</div></div>` : ``}
+      <div class="row grand"><div>Total</div><div>${currency(tx.total || 0)}</div></div>
+    </div>
+
+    <div class="center">Terima kasih atas pembelian Anda!</div>
+  </div>
+  <script>
+    window.onload = function(){ window.focus(); window.print(); window.onafterprint = () => window.close(); }
+  </script>
+</body>
+</html>`;
+};
+
+const handlePrint = () => {
+  if (!selectedTransaction) return;
+  const html = buildReceiptHTML(selectedTransaction);
+  const w = window.open("", "PRINT", "width=380,height=600");
+  if (!w) return;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+};
 
 
 
@@ -657,6 +743,14 @@ const TransactionHistory = () => {
                                         </span>
                                     </div>
                                 </div>
+
+<div className="flex justify-end gap-2 pt-2">
+   <Button variant="outline" onClick={() => setShowDetails(false)}>Close</Button>
+   <Button onClick={handlePrint} className="bg-teal-600 hover:bg-teal-700" data-testid="print-receipt-button">
+     <Printer className="w-4 h-4 mr-2" /> Print Receipt
+   </Button>
+ </div>
+
 
                                 <div className="text-center text-sm text-gray-600 border-t pt-4">
                                     <p>Thank you for your purchase!</p>

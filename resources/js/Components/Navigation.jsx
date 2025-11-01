@@ -50,13 +50,7 @@ export const Navigation = () => {
         >
           Katalog Obat
         </Link>
-        <Link href="/beranda#tentang" className="nav-link">
-          Tentang Kami
-        </Link>
 
-        <Link href="/beranda#kontak" className="nav-link">
-          Kontak
-        </Link>
 
 
       </div>

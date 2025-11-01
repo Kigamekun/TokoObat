@@ -12,13 +12,37 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+
+
 Route::get('/', function () {
-    $featuredMedicines = Medicine::orderBy('created_at', 'desc')->take(6)->get();
+    $today = Carbon::today()->toDateString();
+
+    $featuredMedicines = Medicine::query()
+        ->leftJoin('medicine_batches as b', function ($join) use ($today) {
+            $join->on('b.medicine_id', '=', 'medicines.id')
+                 ->whereDate('b.expiration_date', '>=', $today); // hanya batch non-expired
+        })
+        ->select(
+            'medicines.id',
+            'medicines.name',
+            'medicines.category',
+            'medicines.price',
+            'medicines.description',
+            'medicines.img',
+            DB::raw('COALESCE(SUM(b.qty), 0) as stock')
+        )
+        ->groupBy('medicines.id', 'medicines.name', 'medicines.category', 'medicines.price', 'medicines.description', 'medicines.img')
+        ->orderByDesc('medicines.created_at')
+        ->take(6)
+        ->get();
+
     return Inertia::render('Home', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'canLogin'       => Route::has('login'),
+        'canRegister'    => Route::has('register'),
         'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+        'phpVersion'     => PHP_VERSION,
         'featuredMedicines' => $featuredMedicines,
     ]);
 });
@@ -32,6 +56,37 @@ Route::get('/katalogobat', function () {
         'categories' => $categories,
     ]);
 });
+
+Route::get('/katalogobat', function () {
+    $today = Carbon::today()->toDateString();
+
+    // Ambil stok tersedia (non-expired) per obat
+    $medicines = Medicine::query()
+        ->leftJoin('medicine_batches as b', function ($join) use ($today) {
+            $join->on('b.medicine_id', '=', 'medicines.id')
+                 ->whereDate('b.expiration_date', '>=', $today);
+        })
+        ->select(
+            'medicines.id',
+            'medicines.name',
+            'medicines.price',
+            'medicines.category',
+            'medicines.description',
+            'medicines.img',
+            DB::raw('COALESCE(SUM(b.qty), 0) as stock')
+        )
+        ->groupBy('medicines.id', 'medicines.name', 'medicines.price', 'medicines.category', 'medicines.description', 'medicines.img')
+        ->get();
+
+    $categories = Medicine::select('category')->distinct()->pluck('category');
+
+    return Inertia::render('Katalog', [
+        'medicines'  => $medicines,
+        'categories' => $categories,
+    ]);
+});
+
+
 
 
 // Route::get('/katalog', function () {
@@ -82,7 +137,7 @@ Route::middleware('auth')->group(function () {
 
 });
 
-
+Route::get('/alerts', [DashboardController::class, 'alerts'])->name('alerts');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

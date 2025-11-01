@@ -4,76 +4,91 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Medicine;
+use App\Models\MedicineBatch;
 use Inertia\Inertia;
+use Illuminate\Support\Carbon;
 
 class CartController extends Controller
 {
-    // Menampilkan isi cart
+    private function availableStock(int $medicineId): int
+    {
+        return (int) MedicineBatch::where('medicine_id', $medicineId)
+            ->whereDate('expiration_date', '>=', Carbon::today())
+            ->sum('qty');
+    }
+
     public function index(Request $request)
     {
         $cart = session()->get('cart', []);
-
-        return Inertia::render('Cart', [
-            'cart' => $cart
-        ]);
+        return Inertia::render('Cart', ['cart' => $cart]);
     }
 
-    // Tambah ke cart
     public function add(Request $request, $id)
     {
         $medicine = Medicine::findOrFail($id);
+        $cart     = session()->get('cart', []);
+        $inCart   = isset($cart[$id]) ? (int) $cart[$id]['quantity'] : 0;
+        $avail    = $this->availableStock((int) $id);
 
-        $cart = session()->get('cart', []);
+        if ($inCart + 1 > $avail) {
+            return redirect()->back()->withErrors([
+                'cart' => "Stok {$medicine->name} hanya tersedia {$avail}."
+            ]);
+        }
 
         if (isset($cart[$id])) {
-            // Jika obat sudah ada di cart, tambahkan jumlah
             $cart[$id]['quantity']++;
         } else {
-            // Jika belum ada, masukkan ke cart
             $cart[$id] = [
-                "name" => $medicine->name,
-                "price" => $medicine->price,
+                "name"     => $medicine->name,
+                "price"    => $medicine->price,
                 "quantity" => 1,
-                "unit" => $medicine->unit
+                "unit"     => $medicine->unit
             ];
         }
 
         session()->put('cart', $cart);
-
         return redirect()->back()->with('success', 'Medicine added to cart!');
     }
 
-    // Update jumlah item
     public function update(Request $request, $id)
     {
-        if ($request->quantity <= 0) {
+        $qty = (int) $request->quantity;
+        if ($qty <= 0) {
             return $this->remove($request, $id);
         }
 
-        $cart = session()->get('cart', []);
+        $medicine = Medicine::findOrFail($id);
+        $avail    = $this->availableStock((int) $id);
 
+        if ($qty > $avail) {
+            // Batasi ke stok maksimum agar UX lebih ramah
+            $qty = $avail;
+            if ($qty <= 0) {
+                return $this->remove($request, $id);
+            }
+            $msg = "Jumlah melebihi stok. Disesuaikan menjadi {$qty}.";
+        }
+
+        $cart = session()->get('cart', []);
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $request->quantity;
+            $cart[$id]['quantity'] = $qty;
             session()->put('cart', $cart);
         }
 
-        return redirect()->back()->with('success', 'Cart updated!');
+        return redirect()->back()->with('success', $msg ?? 'Cart updated!');
     }
 
-    // Hapus item dari cart
     public function remove(Request $request, $id)
     {
         $cart = session()->get('cart', []);
-
         if (isset($cart[$id])) {
             unset($cart[$id]);
             session()->put('cart', $cart);
         }
-
         return redirect()->back()->with('success', 'Medicine removed from cart!');
     }
 
-    // Kosongkan cart
     public function clear()
     {
         session()->forget('cart');

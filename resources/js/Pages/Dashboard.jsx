@@ -3,6 +3,8 @@ import { Card } from "../Components/ui/card";
 import { Button } from "../Components/ui/button";
 import { Head, usePage } from "@inertiajs/react";
 import { Badge } from "../Components/ui/badge";
+import { Link } from "@inertiajs/react";
+
 import {
     TrendingUp,
     TrendingDown,
@@ -18,14 +20,10 @@ import {
 import DashboardLayout from "../Layouts/DashboardLayout";
 
 const Dashboard = () => {
-
     const { props } = usePage();
     const user = props.auth.user;
 
-
-     const dashboardData = props.dashboardData; // <-- REAL DATA
-
-
+    const dashboardData = props.dashboardData; // <-- REAL DATA
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat("id-ID", {
@@ -271,6 +269,15 @@ const Dashboard = () => {
                                     );
                                 })}
                             </div>
+                            <br />
+
+                            <Button
+                                asChild
+                                className="mt-2 w-full"
+                                variant="outline"
+                            >
+                                <Link href="/alerts">View Alerts</Link>
+                            </Button>
                         </div>
                     </Card>
                 </div>
