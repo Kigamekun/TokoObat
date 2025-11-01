@@ -57,6 +57,10 @@ class Medicine extends Model
     {
         return $this->batches->sortBy('expiration_date')->first()->expiration_date ?? null;
     }
+    public function movements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
 
 
 }

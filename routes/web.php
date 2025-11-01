@@ -95,6 +95,23 @@ Route::middleware('auth')->group(function () {
     // Medicines
     Route::resource('medicines', MedicineController::class);
 
+    Route::get('/medicines/{medicine}/stock', [MedicineController::class, 'stock'])
+    ->name('medicines.stock');
+
+    // Batch CRUD
+    Route::post('/medicines/{medicine}/batches', [MedicineController::class, 'storeBatch'])
+    ->name('batches.store');
+    Route::put('/medicines/{medicine}/batches/{batch}', [MedicineController::class, 'updateBatch'])
+    ->name('batches.update');
+    Route::delete('/medicines/{medicine}/batches/{batch}', [MedicineController::class, 'destroyBatch'])
+    ->name('batches.destroy');
+
+    // FEFO issue (consume)
+    Route::post('/medicines/{medicine}/issue', [MedicineController::class, 'issueStock'])
+    ->name('stock.issue');
+
+
+
     // Transactions
     Route::resource('transactions', TransactionController::class);
 

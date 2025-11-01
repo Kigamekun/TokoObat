@@ -178,6 +178,10 @@ const MedicineCatalog = () => {
         setShowAddModal(true);
     };
 
+    const handleStockPage = (medicine) => {
+        router.get(route('medicines.stock', medicine.id));
+    }
+
     const handleUpdateMedicine = () => {
         if (!newMedicine.name || !newMedicine.category || !newMedicine.price) {
             toast.error("Please fill in all required fields");
@@ -311,6 +315,17 @@ const MedicineCatalog = () => {
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
                     </Button>
+                    <Button
+                        onClick={() => handleStockPage(medicine)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        data-testid={`edit-medicine-${medicine.id}`}
+                    >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Stock
+                    </Button>
+
                     <Button
                         onClick={() => handleDeleteMedicine(medicine.id)}
                         variant="outline"
