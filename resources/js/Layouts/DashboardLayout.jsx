@@ -306,9 +306,9 @@ const DashboardLayout = ({ children, user, onLogout }) => {
                                 data-testid="notifications-button"
                             >
                                 <Bell className="h-5 w-5 text-gray-400" />
-                                <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center p-0 rounded-full">
+                                {/* <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center p-0 rounded-full">
                                     3
-                                </Badge>
+                                </Badge> */}
                             </Button>
 
                             {/* Mobile user menu */}
