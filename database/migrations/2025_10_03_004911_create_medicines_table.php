@@ -16,11 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('category');
             $table->decimal('price', 10, 2);
-            $table->integer('stock');
+            // $table->integer('stock');
             $table->integer('min_stock');
             $table->string('unit');
             $table->string('img');
-            $table->date('expiration_date');
+            // $table->date('expiration_date');
             $table->text('description')->nullable();
             $table->timestamps();
         });

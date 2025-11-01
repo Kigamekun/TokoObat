@@ -43,10 +43,10 @@ class DashboardController extends Controller
         $totalCategories = Medicine::distinct('category')->count('category');
 
         // === 3. Low stock alerts ===
-        $lowStockCount = Medicine::whereColumn('stock', '<', 'min_stock')->count();
+        $lowStockCount = Medicine::count();
 
         // === 4. Expiring soon ===
-        $expiringSoonCount = Medicine::whereBetween('expiration_date', [now(), now()->addDays(30)])->count();
+        $expiringSoonCount = Medicine::count();
 
         // === 5. Top selling medicines ===
         $topSellingMedicines = TransactionItem::select('medicine_id', DB::raw('SUM(quantity) as total_sold'), DB::raw('SUM(price * quantity) as total_revenue'))

@@ -41,4 +41,22 @@ class Medicine extends Model
             return 'available';
         }
     }
+
+
+    public function batches()
+    {
+        return $this->hasMany(MedicineBatch::class);
+    }
+
+    public function getTotalStockAttribute()
+    {
+        return $this->batches->sum('qty');
+    }
+
+    public function getNearestExpirationAttribute()
+    {
+        return $this->batches->sortBy('expiration_date')->first()->expiration_date ?? null;
+    }
+
+
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Medicine;
+use App\Models\MedicineBatch;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
@@ -11,55 +12,68 @@ class MedicineController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Medicine::query();
+        $query = Medicine::with('batches');
 
         // Search
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%")
+                    ->orWhere('category', 'like', "%{$request->search}%");
             });
         }
 
         // Category filter
-        if ($request->has('category') && $request->category !== 'all') {
+        if ($request->category && $request->category !== 'all') {
             $query->where('category', $request->category);
         }
 
         // Status filter
-        if ($request->has('status') && $request->status !== 'all') {
+        if ($request->status && $request->status !== 'all') {
             $today = now();
-            switch ($request->status) {
-                case 'expired':
-                    $query->where('expiration_date', '<', $today);
-                    break;
-                case 'expiring':
-                    $query->whereBetween('expiration_date', [$today, $today->copy()->addDays(30)]);
-                    break;
-                case 'low-stock':
-                    $query->whereRaw('stock <= min_stock');
-                    break;
-                case 'available':
-                    $query->where('expiration_date', '>', $today->copy()->addDays(30))
-                          ->whereRaw('stock > min_stock');
-                    break;
-            }
+
+            $query->whereHas('batches', function ($q) use ($request, $today) {
+                if ($request->status === 'expired') {
+                    $q->where('expiration_date', '<', $today);
+                } elseif ($request->status === 'expiring') {
+                    $q->whereBetween('expiration_date', [$today, $today->copy()->addDays(30)]);
+                } elseif ($request->status === 'low-stock') {
+                    $q->groupBy('medicine_id')
+                        ->havingRaw('SUM(qty) <= MIN(min_stock)');
+                } elseif ($request->status === 'available') {
+                    $q->where('expiration_date', '>', $today->copy()->addDays(30));
+                }
+            });
         }
 
         $medicines = $query->get()->map(function ($medicine) {
+            $totalStock = $medicine->batches->sum('qty');
+
+            // nearest expiration
+            $nearestBatch = $medicine->batches->sortBy('expiration_date')->first();
+            $expirationDate = $nearestBatch ? $nearestBatch->expiration_date : '-';
+
             return [
                 'id' => $medicine->id,
                 'name' => $medicine->name,
                 'category' => $medicine->category,
                 'price' => (float) $medicine->price,
-                'stock' => $medicine->stock,
+                'stock' => $totalStock,
                 'minStock' => $medicine->min_stock,
                 'unit' => $medicine->unit,
                 'img' => $medicine->img ? asset($medicine->img) : null,
-                'expirationDate' => $medicine->expiration_date->format('Y-m-d'),
+                'expirationDate' => $expirationDate,
+
+                // Kirim batch untuk modal stok
+                'batches' => $medicine->batches->map(function ($batch) {
+                    return [
+                        'id' => $batch->id,
+                        'batchCode' => $batch->batch_code,
+                        'qty' => $batch->qty,
+                        'expirationDate' => $batch->expiration_date,
+                    ];
+                }),
+
                 'description' => $medicine->description,
-                'status' => $medicine->status,
                 'lastUpdated' => $medicine->updated_at->format('Y-m-d'),
             ];
         });
@@ -81,32 +95,35 @@ class MedicineController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'minStock' => 'required|integer|min:0',
-            'unit' => 'required|in:tablet,capsule,bottle,box,tube,vial',
+            'unit' => 'required|string',
             'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'expirationDate' => 'required|date|after:today',
             'description' => 'nullable|string',
         ]);
 
-        // Upload file ke public/assets/medicines
         $imgPath = null;
         if ($request->hasFile('img')) {
             $file = $request->file('img');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $destination = public_path('assets/medicines');
-            $file->move($destination, $filename);
-            $imgPath = 'assets/medicines/' . $filename; // path relatif
+            $file->move(public_path('assets/medicines'), $filename);
+            $imgPath = 'assets/medicines/' . $filename;
         }
 
-        Medicine::create([
+        $medicine = Medicine::create([
             'name' => $validated['name'],
             'category' => $validated['category'],
             'price' => $validated['price'],
-            'stock' => $validated['stock'],
             'min_stock' => $validated['minStock'],
             'unit' => $validated['unit'],
             'img' => $imgPath,
-            'expiration_date' => $validated['expirationDate'],
             'description' => $validated['description'],
+        ]);
+
+        MedicineBatch::create([
+            'medicine_id' => $medicine->id,
+            'batch_code' => 'BATCH-' . time(),
+            'qty' => $validated['stock'],
+            'expiration_date' => $validated['expirationDate'],
         ]);
 
         return redirect()->route('medicines.index')->with('success', 'Medicine added successfully!');
@@ -118,25 +135,20 @@ class MedicineController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
             'minStock' => 'required|integer|min:0',
-            'unit' => 'required|in:tablet,capsule,bottle,box,tube,vial',
+            'unit' => 'required|string',
             'img' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'expirationDate' => 'required|date|after:today',
             'description' => 'nullable|string',
         ]);
 
-        // Jika user upload gambar baru
         if ($request->hasFile('img')) {
-            // Hapus gambar lama kalau ada
             if ($medicine->img && File::exists(public_path($medicine->img))) {
                 File::delete(public_path($medicine->img));
             }
 
             $file = $request->file('img');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $destination = public_path('assets/medicines');
-            $file->move($destination, $filename);
+            $file->move(public_path('assets/medicines'), $filename);
             $medicine->img = 'assets/medicines/' . $filename;
         }
 
@@ -144,10 +156,8 @@ class MedicineController extends Controller
             'name' => $validated['name'],
             'category' => $validated['category'],
             'price' => $validated['price'],
-            'stock' => $validated['stock'],
             'min_stock' => $validated['minStock'],
             'unit' => $validated['unit'],
-            'expiration_date' => $validated['expirationDate'],
             'description' => $validated['description'],
             'img' => $medicine->img,
         ]);
@@ -161,7 +171,9 @@ class MedicineController extends Controller
             File::delete(public_path($medicine->img));
         }
 
+        $medicine->batches()->delete();
         $medicine->delete();
+
         return redirect()->route('medicines.index')->with('success', 'Medicine deleted successfully!');
     }
 
