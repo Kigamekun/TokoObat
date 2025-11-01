@@ -316,11 +316,12 @@ export default function Home() {
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">Alamat Lengkap</h3>
                       <p className="text-gray-600 leading-relaxed">
-                        Jl. Raya Kesehatan No. 123, Kelurahan Sehat,
-                        Kecamatan Obat, Jakarta Selatan 12345
+                        Komplek Pasar Telagawaru,
+                        Desa Jago Kecamatan Praya
+
                       </p>
                       <p className="text-sm text-teal-600 mt-2 font-medium">
-                        Dekat dengan Rumah Sakit Pusat & Mall Kesehatan
+
                       </p>
                     </div>
                   </div>
@@ -333,8 +334,8 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">Hubungi Kami</h3>
-                      <p className="text-2xl font-bold text-gray-800 mb-1">+62 21 1234 5678</p>
-                      <p className="text-gray-600">Konsultasi gratis dengan apoteker kami</p>
+                      <p className="text-2xl font-bold text-gray-800 mb-1">+62 819-0710-0001</p>
+                      <p className="text-gray-600"></p>
                       <div className="mt-2 flex items-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                         <span className="text-sm text-green-600 font-medium">Online sekarang</span>
@@ -376,8 +377,8 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">Email & Media Sosial</h3>
-                      <p className="text-gray-600 mb-2">info@mitratokoobat.com</p>
-                      <p className="text-sm text-gray-500">Respons dalam 1-2 jam kerja</p>
+                      <p className="text-gray-600 mb-2">jhunatransport@gmail.com</p>
+                      <p className="text-sm text-gray-500"></p>
                     </div>
                   </div>
                 </div>
@@ -540,17 +541,24 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-teal-400 mt-1 flex-shrink-0" />
                       <p className="text-gray-300 text-sm">
-                        Jl. Raya Kesehatan No. 123<br />
-                        Jakarta Selatan 12345
+                        Komplek Pasar Telagawaru<br />
+                        Desa Jago Kecamatan Praya
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-teal-400 flex-shrink-0" />
-                      <p className="text-gray-300">+62 21 1234 5678</p>
+                        <Phone className="h-5 w-5 text-teal-400 flex-shrink-0" />
+                            <a
+                                href="https://wa.me/6281907100001"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-300 hover:text-teal-400 transition-colors"
+                            >
+                                +62 819-0710-0001
+                            </a>
                     </div>
                     <div className="flex items-center gap-3">
                       <Mail className="h-5 w-5 text-teal-400 flex-shrink-0" />
-                      <p className="text-gray-300">info@mitratokoobat.com</p>
+                      <p className="text-gray-300">jhunatransport@gmail.com</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <Clock className="h-5 w-5 text-teal-400 flex-shrink-0" />

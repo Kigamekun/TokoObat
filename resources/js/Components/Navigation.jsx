@@ -100,13 +100,13 @@ export const Navigation = () => {
             >
               Katalog Obat
             </Link>
-            <Link href="/beranda#tentang" className="nav-link">
+            {/* <Link href="/beranda#tentang" className="nav-link">
               Tentang Kami
-            </Link>
+            </Link> */}
 
-            <Link href="/beranda#kontak" className="nav-link">
+            {/* <Link href="/beranda#kontak" className="nav-link">
               Kontak
-            </Link>
+            </Link> */}
           </div>
         </div>
       )}
