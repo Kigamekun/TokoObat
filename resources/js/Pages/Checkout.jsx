@@ -387,7 +387,7 @@ export default function Checkout() {
                         </button>
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900">
-                                Checkout
+                                Pre-order
                             </h1>
                             <p className="text-gray-600">
                                 Lengkapi data untuk menyelesaikan pesanan
