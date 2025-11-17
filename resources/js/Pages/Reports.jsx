@@ -50,6 +50,9 @@ import DashboardLayout from "../Layouts/DashboardLayout";
 
 const Reports = () => {
     const { props } = usePage();
+    const user = props.auth.user;
+
+
     const { reports: initialReports, categories: initialCategories } = props;
 
     const [selectedPeriod, setSelectedPeriod] = useState("7days");
@@ -296,7 +299,7 @@ const Reports = () => {
     }, [selectedPeriod]);
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={user}>
             <div className="space-y-6 fade-in">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

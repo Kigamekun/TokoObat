@@ -13,6 +13,9 @@ import axios from 'axios';
 
 const TransactionHistory = () => {
     const { props } = usePage();
+    const user = props.auth.user;
+
+
     const { transactions: initialTransactions, filters: initialFilters } = props;
     const [transactions, setTransactions] = useState(initialTransactions?.data || []);
     const [searchTerm, setSearchTerm] = useState(initialFilters?.search || "");
@@ -298,7 +301,7 @@ const handlePrint = () => {
     const averageTransaction = filteredTransactions.length > 0 ? totalRevenue / filteredTransactions.length : 0;
 
     return (
-        <DashboardLayout>
+        <DashboardLayout user={user}>
             <div className="space-y-6 fade-in">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

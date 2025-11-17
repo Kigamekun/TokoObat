@@ -26,7 +26,6 @@ import { router } from "@inertiajs/react";
 import { Toaster } from "sonner";
 
 const DashboardLayout = ({ children, user, onLogout }) => {
-    console.log("User in DashboardLayout:", user); // Debugging line
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -44,24 +43,14 @@ const DashboardLayout = ({ children, user, onLogout }) => {
             icon: ShoppingCart,
             current: location.pathname === "/transactions",
         },
-        {
-            name: "Medicine Catalog",
-            href: "/medicines",
-            icon: Package,
-            current: location.pathname === "/medicines",
-        },
-        {
-            name: "Reports",
-            href: "/reports",
-            icon: BarChart3,
-            current: location.pathname === "/reports",
-        },
+       
         {
             name: "Transaction History",
             href: "/history",
             icon: History,
             current: location.pathname === "/history",
         },
+       
         // {
         //     name: "Analytics",
         //     href: "/analytics",
@@ -73,18 +62,25 @@ const DashboardLayout = ({ children, user, onLogout }) => {
     // Admin-only navigation items
     if (user?.role === "admin") {
         navigation.push(
+             {
+                name: "Medicine Catalog",
+                href: "/medicines",
+                icon: Package,
+                current: location.pathname === "/medicines",
+            },
+            {
+                name: "Reports",
+                href: "/reports",
+                icon: BarChart3,
+                current: location.pathname === "/reports",
+            },
             {
                 name: "User Management",
                 href: "/users",
                 icon: Users,
                 current: location.pathname === "/users",
             },
-            {
-                name: "Settings",
-                href: "/settings",
-                icon: Settings,
-                current: location.pathname === "/settings",
-            }
+           
         );
     }
     const handleLogout = () => {
